@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace ProjectGo2D.Platformer
 {
@@ -38,6 +39,7 @@ namespace ProjectGo2D.Platformer
             scoreText.text = currentScore.ToString("00") + "/" + maxScore.ToString("00");
             if (IsCompleted())
             {
+                Time.timeScale = 0;
                 OnScoreCompleted.Invoke();
             }
         }
