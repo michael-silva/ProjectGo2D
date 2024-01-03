@@ -215,9 +215,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 4
-  jumpHeight: 3
+  jumpHeight: 1.5
   gravityScale: 2
   fallGravityScale: 3
+  enemiesLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  interactiveLayer:
+    serializedVersion: 2
+    m_Bits: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 256

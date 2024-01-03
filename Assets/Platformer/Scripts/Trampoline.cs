@@ -4,7 +4,13 @@ using UnityEngine;
 
 namespace ProjectGo2D.Platformer
 {
-    public class Trampoline : MonoBehaviour
+
+    public interface IActionable
+    {
+        void Active(Character character);
+    }
+
+    public class Trampoline : MonoBehaviour, IActionable
     {
         [SerializeField]
         private Animator animator;
@@ -21,6 +27,11 @@ namespace ProjectGo2D.Platformer
         void Update()
         {
 
+        }
+        public void Active(Character character)
+        {
+            animator.SetTrigger("Jump");
+            character.Jump(jumpForce);
         }
 
         private void OnCollisionEnter2D(Collision2D other)

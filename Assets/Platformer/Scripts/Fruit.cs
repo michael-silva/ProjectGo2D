@@ -8,6 +8,7 @@ namespace ProjectGo2D.Platformer
     {
         void Collect();
     }
+
     public class Fruit : MonoBehaviour, ICollectable
     {
         [SerializeField]

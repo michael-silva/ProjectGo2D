@@ -13,6 +13,8 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private float jumpHeight = 1;
         [SerializeField] private float gravityScale = 1;
         [SerializeField] private float fallGravityScale = 2;
+        [SerializeField] private LayerMask enemiesLayer;
+        [SerializeField] private LayerMask interactiveLayer;
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private LayerMask itemsLayer;
         [SerializeField] private LayerMask gameOverLayer;
@@ -52,20 +54,45 @@ namespace ProjectGo2D.Platformer
         private void CollisionChecks()
         {
             if (isDead) return;
-            var itemHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.right, 0.1f, itemsLayer);
-            if (itemHit.collider != null)
+            var collectableHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.zero, 0.1f, itemsLayer);
+            if (collectableHit.collider != null)
             {
-                var collectable = itemHit.collider.GetComponent<ICollectable>();
+                var collectable = collectableHit.collider.GetComponent<ICollectable>();
                 collectable.Collect();
             }
 
-            var goHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.right, 0.1f, gameOverLayer);
+            var actionableHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.zero, 0.1f, interactiveLayer);
+            if (actionableHit.collider != null)
+            {
+                var actionable = actionableHit.collider.GetComponent<IActionable>();
+                actionable.Active(this);
+            }
+
+            var goHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.zero, 0.1f, gameOverLayer);
             if (goHit.collider != null)
             {
                 animator.SetBool("Hit", true);
                 isDead = true;
                 GameManager.Instance.ShowGameOver();
                 Destroy(gameObject, 0.25f);
+            }
+
+            var enemyHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.size, 0, Vector2.zero, 0.1f, enemiesLayer);
+            if (enemyHit.collider != null)
+            {
+                if (isFalling && bottomFront.transform.position.y < enemyHit.point.y)
+                {
+                    var enemy = enemyHit.collider.GetComponent<IEnemy>();
+                    enemy.Kill();
+                    Jump(0.5f);
+                }
+                else
+                {
+                    animator.SetBool("Hit", true);
+                    isDead = true;
+                    GameManager.Instance.ShowGameOver();
+                    Destroy(gameObject, 0.25f);
+                }
             }
         }
 
