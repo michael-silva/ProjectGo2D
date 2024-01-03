@@ -73,7 +73,7 @@ namespace ProjectGo2D.Platformer
             {
                 animator.SetBool("Hit", true);
                 isDead = true;
-                GameManager.Instance.ShowGameOver();
+                GameManager.Instance.GameOver();
                 Destroy(gameObject, 0.25f);
             }
 
@@ -90,7 +90,7 @@ namespace ProjectGo2D.Platformer
                 {
                     animator.SetBool("Hit", true);
                     isDead = true;
-                    GameManager.Instance.ShowGameOver();
+                    GameManager.Instance.GameOver();
                     Destroy(gameObject, 0.25f);
                 }
             }
@@ -130,9 +130,10 @@ namespace ProjectGo2D.Platformer
 
         private void OnDrawGizmos()
         {
+#if UNITY_EDITOR
             GUI.color = Color.black;
             Handles.Label(transform.position, velocity.ToString());
-
+#endif
             float xMovement = Mathf.Abs(velocity.x) * Time.deltaTime;
             var offset = new Vector3(0, 0.1f, 0);
 

@@ -84,7 +84,7 @@ namespace ProjectGo2D.Platformer
             {
                 animator.SetBool("Hit", true);
                 isDead = true;
-                GameManager.Instance.ShowGameOver();
+                GameManager.Instance.GameOver();
                 Destroy(gameObject, 0.25f);
             }
         }

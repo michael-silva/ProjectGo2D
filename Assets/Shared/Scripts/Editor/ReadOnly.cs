@@ -12,6 +12,7 @@ namespace ProjectGo2D.Shared
 
     }
 
+#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
     public class ReadOnlyDrawer : PropertyDrawer
     {
@@ -44,5 +45,6 @@ namespace ProjectGo2D.Shared
             EditorGUI.LabelField(position, label.text, valueStr);
         }
     }
+#endif
 
 }

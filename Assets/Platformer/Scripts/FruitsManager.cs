@@ -8,9 +8,6 @@ namespace ProjectGo2D.Platformer
 {
     public class FruitsManager : MonoBehaviour
     {
-        [SerializeField]
-        private GameObject LevelCompleteScreen;
-
         private Fruit[] fruits;
 
         // Start is called before the first frame update
@@ -19,12 +16,6 @@ namespace ProjectGo2D.Platformer
             fruits = GetComponentsInChildren<Fruit>();
             int total = fruits.Sum(fruit => fruit.GetScorePoints());
             ScoreManager.Instance.SetMaxScore(total);
-            ScoreManager.Instance.OnScoreCompleted.AddListener(CompleteLevel);
-        }
-
-        void CompleteLevel()
-        {
-            LevelCompleteScreen.SetActive(true);
         }
     }
 }

@@ -1,31 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace ProjectGo2D.Platformer
 {
     public class GameManager : MonoBehaviour
     {
-        private static GameManager instance;
-        public static GameManager Instance { get { return instance; } }
+        public static GameManager Instance { get; private set; }
 
-        [SerializeField]
-        private GameObject gameOverUI;
+        public UnityEvent OnGameOver = new UnityEvent();
 
         // Start is called before the first frame update
         void Awake()
         {
-            if (!instance)
+            if (Instance != null && Instance != this)
             {
-                instance = this;
+                Destroy(this);
+                Instance.OnGameOver.RemoveAllListeners();
+            }
+            else
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
             }
         }
 
-        public void ShowGameOver()
+        public void GameOver()
         {
-            gameOverUI.SetActive(true);
-
+            OnGameOver.Invoke();
         }
 
         // Update is called once per frame
@@ -39,7 +43,15 @@ namespace ProjectGo2D.Platformer
         public void NextLevel()
         {
             var scene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(scene.buildIndex + 1);
+            int nextIndex = scene.buildIndex + 1;
+            if (nextIndex < SceneManager.sceneCountInBuildSettings)
+            {
+                SceneManager.LoadSceneAsync(nextIndex);
+            }
+            else
+            {
+                SceneManager.LoadSceneAsync(0);
+            }
         }
     }
 }

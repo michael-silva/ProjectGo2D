@@ -9,37 +9,41 @@ namespace ProjectGo2D.Platformer
 {
     public class ScoreManager : MonoBehaviour
     {
-        private static ScoreManager instance;
-        public static ScoreManager Instance { get { return instance; } }
-
-        [SerializeField]
-        private TextMeshProUGUI scoreText;
+        public static ScoreManager Instance { get; private set; }
         private int currentScore;
         private int maxScore;
 
         public UnityEvent OnScoreCompleted = new UnityEvent();
+        public UnityEvent<int> OnScoreUpdated = new UnityEvent<int>();
 
         // Start is called before the first frame update
         void Awake()
         {
-            if (!instance)
+            if (Instance != null && Instance != this)
             {
-                instance = this;
+                Destroy(this);
+                Reset();
+            }
+            else
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
             }
         }
 
-        // Update is called once per frame
-        void Update()
+        public void Reset()
         {
+            Instance.currentScore = 0;
+            Instance.OnScoreCompleted.RemoveAllListeners();
+            Instance.OnScoreUpdated.RemoveAllListeners();
         }
 
         public void UpdateScore(int points)
         {
             currentScore += points;
-            scoreText.text = currentScore.ToString("00") + "/" + maxScore.ToString("00");
+            OnScoreUpdated.Invoke(currentScore);
             if (IsCompleted())
             {
-                Time.timeScale = 0;
                 OnScoreCompleted.Invoke();
             }
         }
@@ -48,6 +52,12 @@ namespace ProjectGo2D.Platformer
         {
             maxScore = points;
         }
+
+        public int GetMaxScore()
+        {
+            return maxScore;
+        }
+
         public bool IsCompleted()
         {
             return maxScore == currentScore;
