@@ -4,27 +4,20 @@ using UnityEngine;
 
 namespace ProjectGo2D.Platformer
 {
-    public class Player : MonoBehaviour
+    public class Player : MonoBehaviour, ICharacter
     {
-        [SerializeField]
-        private LayerMask itemsLayer = 7;
-        [SerializeField]
-        private LayerMask GroundLayer = 8;
-        [SerializeField]
-        private LayerMask GameOverLayer = 9;
         private Rigidbody2D rb;
         private BoxCollider2D boxCollider;
-        [SerializeField]
-        private Animator animator;
-        [SerializeField]
-        private float speed;
-        [SerializeField]
-        private float jumpForce;
-        [SerializeField]
-        private float walljumpForce;
-        [SerializeField]
-        private float walljumpInterval;
-        private bool isOnGround = false;
+        private float defaultGravityScale;
+
+        [SerializeField] private LayerMask GroundLayer;
+        [SerializeField] private LayerMask WallLayer;
+        [SerializeField] private Animator animator;
+        [SerializeField] private float speed;
+        [SerializeField] private float jumpForce;
+        [SerializeField] private float walljumpForce;
+        [SerializeField] private float walljumpInterval;
+        private bool isGrounded = false;
         private bool isOnWall = false;
         private float walljumpCooldown;
         private bool isAirJumping = false;
@@ -35,6 +28,7 @@ namespace ProjectGo2D.Platformer
         {
             rb = GetComponent<Rigidbody2D>();
             boxCollider = GetComponent<BoxCollider2D>();
+            defaultGravityScale = rb.gravityScale;
         }
 
         // Update is called once per frame
@@ -45,6 +39,13 @@ namespace ProjectGo2D.Platformer
             GroundChecking();
             WallChecking();
 
+            InputControls();
+
+            UpdateAnimations();
+        }
+
+        private void InputControls()
+        {
             if (walljumpCooldown >= walljumpInterval)
             {
                 var movement = Input.GetAxis("Horizontal");
@@ -53,16 +54,7 @@ namespace ProjectGo2D.Platformer
 
                 if (Input.GetButtonDown("Jump"))
                 {
-                    if (isOnGround || isOnWall)
-                    {
-                        Jump(jumpForce);
-                    }
-                    else if (!isAirJumping)
-                    {
-                        animator.SetBool("InDoubleJump", true);
-                        isAirJumping = true;
-                        Jump(jumpForce * 1.5f);
-                    }
+                    Jump(jumpForce);
                 }
             }
             else
@@ -71,78 +63,21 @@ namespace ProjectGo2D.Platformer
             }
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            if (isDead) return;
-            if (other.gameObject.layer == itemsLayer)
-            {
-                var collectable = other.GetComponent<ICollectable>();
-                collectable.Collect();
-            }
-
-            if (other.gameObject.layer == GameOverLayer)
-            {
-                animator.SetBool("Hit", true);
-                isDead = true;
-                GameManager.Instance.GameOver();
-                Destroy(gameObject, 0.25f);
-            }
-        }
-
-        // private void OnCollisionEnter2D(Collision2D other)
-        // {
-        //     if (isDead) return;
-        //     if (other.gameObject.layer == GroundLayer)
-        //     {
-        //         isOnGround = true;
-        //         isAirJumping = false;
-        //         animator.SetBool("InAir", false);
-        //     }
-        // }
-        // private void OnCollisionExit2D(Collision2D other)
-        // {
-        //     if (isDead) return;
-        //     if (other.gameObject.layer == GroundLayer)
-        //     {
-        //         isOnGround = false;
-        //         animator.SetBool("InAir", true);
-        //     }
-        // }
-
         private void GroundChecking()
         {
             var ray = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.1f, GroundLayer);
-            isOnGround = ray.collider != null;
-            if (isOnGround)
-            {
-                animator.SetBool("InAir", false);
-                animator.SetBool("IsJumping", false);
-                animator.SetBool("InDoubleJump", false);
-                isAirJumping = false;
-            }
-            else
-            {
-                animator.SetBool("InAir", true);
-                if (IsFalling())
-                {
-                    animator.SetBool("IsJumping", false);
-                    if (isAirJumping)
-                    {
-                        animator.SetBool("InDoubleJump", false);
-                    }
-                }
-            }
+            isGrounded = ray.collider != null;
         }
 
         private void WallChecking()
         {
-            if (isOnGround)
+            if (isGrounded)
             {
-                rb.gravityScale = 4;
+                rb.gravityScale = defaultGravityScale;
                 isOnWall = false;
                 return;
             }
-            var ray = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, IsPointingRight() ? Vector2.right : Vector2.left, 0.1f, GroundLayer);
+            var ray = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, GetFacingDirection(), 0.1f, WallLayer);
             isOnWall = ray.collider != null;
             if (isOnWall)
             {
@@ -153,8 +88,42 @@ namespace ProjectGo2D.Platformer
             else
             {
                 walljumpCooldown = walljumpInterval;
-                rb.gravityScale = 4;
+                rb.gravityScale = defaultGravityScale;
             }
+        }
+
+        private void UpdateAnimations()
+        {
+            animator.SetBool("IsWalking", IsWalking());
+            animator.SetBool("IsGrounded", isGrounded);
+            // animator.SetBool("IsJumping", true);
+            // animator.SetBool("InAir", true);
+            // animator.SetBool("InDoubleJump", true);
+        }
+
+        public bool CanAttack()
+        {
+            return !isOnWall;
+        }
+
+        public void FacingDirection(float dir)
+        {
+            if (dir > 0)
+            {
+                transform.localScale = new Vector3(1, 1, 1);
+            }
+            else
+            {
+                transform.localScale = new Vector3(-1, 1, 1);
+            }
+        }
+
+        public void Move(Vector2 direction)
+        {
+            float force = direction.x * speed;
+            rb.velocity = new Vector2(force, rb.velocity.y);
+            if (!IsWalking()) return;
+            FacingDirection(direction.x);
         }
 
         public bool IsFalling()
@@ -162,46 +131,34 @@ namespace ProjectGo2D.Platformer
             return rb.velocity.y < 0;
         }
 
-        public void FacingDirection(float dir)
+        public bool IsWalking()
         {
-            if (dir > 0)
-            {
-                transform.eulerAngles = new Vector3(0, 0, 0);
-            }
-            else
-            {
-                transform.eulerAngles = new Vector3(0, 180, 0);
-            }
+            return rb.velocity.x != 0;
         }
 
-        public void Move(Vector2 direction)
+        public Vector2 GetFacingDirection()
         {
-            float force = direction.x * speed;
-            rb.AddForce(new Vector2(force - rb.velocity.x, 0), ForceMode2D.Impulse);
-            bool isWalking = direction.x != 0;
-            animator.SetBool("IsWalking", isWalking);
-            if (!isWalking) return;
-            FacingDirection(direction.x);
-        }
-
-        public bool IsPointingRight()
-        {
-            return transform.eulerAngles == Vector3.zero;
+            return new Vector2(transform.localScale.x, 0);
         }
 
         public void Jump(float force)
         {
-            float xForce = 0;
-            if (isOnWall)
+            if (isGrounded)
             {
-                xForce = IsPointingRight() ? -1 : 1;
-                FacingDirection(xForce);
+                isAirJumping = false;
+                rb.velocity = new Vector2(rb.velocity.x, force);
             }
-            rb.AddForce(new Vector2(xForce * walljumpCooldown, force - rb.velocity.y), ForceMode2D.Impulse);
-            isOnGround = false;
-            animator.SetBool("IsJumping", true);
-            animator.SetBool("InAir", true);
-            // rb.AddForce(new Vector3(0, force, 0), ForceMode2D.Impulse);
+            else if (isOnWall)
+            {
+                walljumpCooldown = 0;
+                Move(GetFacingDirection() * -6);
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            }
+            else if (!isAirJumping)
+            {
+                isAirJumping = true;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            }
         }
     }
 }

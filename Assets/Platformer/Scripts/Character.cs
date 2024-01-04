@@ -6,6 +6,14 @@ using ProjectGo2D.Shared;
 
 namespace ProjectGo2D.Platformer
 {
+    public interface ICharacter
+    {
+        void Move(Vector2 direction);
+        void Jump(float modifier = 1);
+
+        Vector2 GetFacingDirection();
+    }
+
     public class Character : MonoBehaviour
     {
         private BoxCollider2D boxCollider;
@@ -183,7 +191,7 @@ namespace ProjectGo2D.Platformer
         private void WallChecking()
         {
             float xMovement = Mathf.Abs(velocity.x) * Time.deltaTime;
-            var direction = new Vector2(GetFacingDirection() * xMovement, 0);
+            var direction = new Vector2(GetFacingDirection().x * xMovement, 0);
             var offset = new Vector3(0, 0.1f, 0);
             isOnWall = Physics2D.Raycast(bottomFront.position + offset, direction, xMovement, groundLayer);
 
@@ -201,7 +209,7 @@ namespace ProjectGo2D.Platformer
         private void FacingDirection(float direction)
         {
             if (direction == 0) return;
-            var currentFacing = GetFacingDirection();
+            var currentFacing = GetFacingDirection().x;
             var newFacingDirection = direction > 0 ? 1 : -1;
             if (currentFacing != newFacingDirection)
             {
@@ -209,9 +217,9 @@ namespace ProjectGo2D.Platformer
             }
         }
 
-        public int GetFacingDirection()
+        public Vector2 GetFacingDirection()
         {
-            return transform.localScale.x < 0 ? -1 : 1;
+            return new Vector2(transform.localScale.x, 0);
         }
 
         public void Move(Vector2 direction)

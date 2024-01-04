@@ -7,7 +7,7 @@ namespace ProjectGo2D.Platformer
 {
     public class InputController : MonoBehaviour
     {
-        private Character character;
+        private ICharacter character;
         [SerializeField, ReadOnly] private bool isJumpPressed;
         private float jumpTimer = 0;
         private float doubleJumpDelay = 0.1f;
@@ -15,7 +15,7 @@ namespace ProjectGo2D.Platformer
         // Start is called before the first frame update
         void Start()
         {
-            character = GetComponent<Character>();
+            character = GetComponent<ICharacter>();
 
         }
 
