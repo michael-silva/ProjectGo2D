@@ -7,6 +7,7 @@ namespace ProjectGo2D.Platformer
 {
     public class Bullet : MonoBehaviour
     {
+        [SerializeField] private float power;
         [SerializeField] private float speed;
         [SerializeField] private Animator animator;
         [SerializeField, ReadOnly] private Vector2 direction;
@@ -15,6 +16,7 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private float maxLifetime;
         [SerializeField, ReadOnly] private float lifetime;
         private BoxCollider2D boxCollider;
+        private float powerMultiplier = 1;
 
         // Start is called before the first frame update
         void Awake()
@@ -38,6 +40,11 @@ namespace ProjectGo2D.Platformer
         {
             if (other.CompareTag(originTag)) return;
             hit = true;
+            var health = other.GetComponent<Health>();
+            if (health != null)
+            {
+                health.TakeDamage(power * powerMultiplier);
+            }
             boxCollider.enabled = false;
             animator.SetTrigger("Explode");
             StartCoroutine(Deactivate());
@@ -49,16 +56,22 @@ namespace ProjectGo2D.Platformer
             gameObject.SetActive(false);
         }
 
-        public void Fire(Vector2 _direction, string _originTag)
+        public void Setup(float force, string _originTag)
         {
+            powerMultiplier = force;
+            transform.localScale = new Vector3(powerMultiplier, powerMultiplier, 1);
             lifetime = 0;
             originTag = _originTag;
             hit = false;
             boxCollider.enabled = true;
+        }
+
+        public void Fire(Vector2 _direction)
+        {
             direction = _direction;
             if (transform.localScale.x != _direction.x)
             {
-                transform.localScale = new Vector3(_direction.x, 1, 1);
+                transform.localScale = new Vector3(_direction.x * transform.localScale.x, transform.localScale.y, 1);
             }
         }
     }

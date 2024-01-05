@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using ProjectGo2D.Shared;
 using UnityEngine;
 
 namespace ProjectGo2D.Platformer
@@ -15,13 +16,12 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private Animator animator;
         [SerializeField] private float speed;
         [SerializeField] private float jumpForce;
-        [SerializeField] private float walljumpForce;
         [SerializeField] private float walljumpInterval;
-        private bool isGrounded = false;
-        private bool isOnWall = false;
-        private float walljumpCooldown;
-        private bool isAirJumping = false;
-        private bool isDead = false;
+        [SerializeField, ReadOnly] private bool isGrounded = false;
+        [SerializeField, ReadOnly] private bool isOnWall = false;
+        [SerializeField, ReadOnly] private bool isAirJumping = false;
+        [SerializeField, ReadOnly] private bool isDead = false;
+        [SerializeField, ReadOnly] private float walljumpCooldown;
 
         // Start is called before the first frame update
         void Start()
@@ -29,6 +29,7 @@ namespace ProjectGo2D.Platformer
             rb = GetComponent<Rigidbody2D>();
             boxCollider = GetComponent<BoxCollider2D>();
             defaultGravityScale = rb.gravityScale;
+            walljumpCooldown = walljumpInterval;
         }
 
         // Update is called once per frame
@@ -38,9 +39,7 @@ namespace ProjectGo2D.Platformer
 
             GroundChecking();
             WallChecking();
-
             InputControls();
-
             UpdateAnimations();
         }
 
@@ -81,13 +80,11 @@ namespace ProjectGo2D.Platformer
             isOnWall = ray.collider != null;
             if (isOnWall)
             {
-                rb.gravityScale = 0;
-                rb.velocity = Vector2.zero;
-                walljumpCooldown = 0;
+                rb.gravityScale = defaultGravityScale / 2;
+                // rb.velocity = Vector2.zero;
             }
             else
             {
-                walljumpCooldown = walljumpInterval;
                 rb.gravityScale = defaultGravityScale;
             }
         }
@@ -99,11 +96,6 @@ namespace ProjectGo2D.Platformer
             // animator.SetBool("IsJumping", true);
             // animator.SetBool("InAir", true);
             // animator.SetBool("InDoubleJump", true);
-        }
-
-        public bool CanAttack()
-        {
-            return !isOnWall;
         }
 
         public void FacingDirection(float dir)
@@ -151,7 +143,7 @@ namespace ProjectGo2D.Platformer
             else if (isOnWall)
             {
                 walljumpCooldown = 0;
-                Move(GetFacingDirection() * -6);
+                Move(GetFacingDirection() * -1);
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             }
             else if (!isAirJumping)

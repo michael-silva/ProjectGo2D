@@ -17,7 +17,7 @@ TagManager:
   - GameOver
   - Enemies
   - Walls
-  - 
+  - Player
   - 
   - 
   - 
@@ -40,4 +40,19 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 832775477
+    locked: 0
+  - name: Behindground
+    uniqueID: 1853745995
+    locked: 0
+  - name: Ground
+    uniqueID: 705238377
+    locked: 0
+  - name: Frontground
+    uniqueID: 3161402413
+    locked: 0
+  - name: UI
+    uniqueID: 2694191673
     locked: 0
