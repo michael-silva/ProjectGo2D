@@ -23,7 +23,7 @@ namespace ProjectGo2D.Platformer
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
-            var health = other.GetComponent<Health>();
+            var health = other.GetComponent<IHealth>();
             health.TakeDamage(damage);
         }
     }

@@ -1,13 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 namespace ProjectGo2D.Platformer
 {
-    public class Health : MonoBehaviour
+    public class EnemyHealth : MonoBehaviour, IHealth
     {
         [SerializeField] private float maxHealth;
         [SerializeField] private float currentHealth;
@@ -19,19 +16,12 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private SpriteRenderer sprite;
         private const int minHealthValue = 0;
         private const int maxHealthValue = 10;
-        public readonly UnityEvent<float> OnMaxHealthChange = new UnityEvent<float>();
-        public readonly UnityEvent<float> OnHealthChange = new UnityEvent<float>();
 
-        private void Start()
-        {
-            OnMaxHealthChange.Invoke(maxHealth);
-            OnHealthChange.Invoke(currentHealth);
-        }
-
+        private bool isInvulnerable;
         public void TakeDamage(float damage)
         {
-            currentHealth = Math.Max(minHealthValue, currentHealth - damage);
-            OnHealthChange.Invoke(currentHealth);
+            if (isInvulnerable) return;
+            currentHealth = Mathf.Max(minHealthValue, currentHealth - damage);
             animator.SetTrigger("Hit");
             if (currentHealth > 0)
             {
@@ -46,7 +36,7 @@ namespace ProjectGo2D.Platformer
 
         private IEnumerator Invulnerability()
         {
-            Physics2D.IgnoreLayerCollision(gameObject.layer, enemyLayerNumber, true);
+            isInvulnerable = true;
             float interval = invulnerableDuration / (flashNumbers * 2);
             for (int i = 0; i < flashNumbers; i++)
             {
@@ -55,7 +45,7 @@ namespace ProjectGo2D.Platformer
                 sprite.color = Color.white;
                 yield return new WaitForSeconds(interval);
             }
-            Physics2D.IgnoreLayerCollision(gameObject.layer, enemyLayerNumber, false);
+            isInvulnerable = false;
         }
 
 
@@ -63,20 +53,16 @@ namespace ProjectGo2D.Platformer
         {
             yield return new WaitForSeconds(0.8f);
             Destroy(gameObject);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         public void Heal(float health)
         {
-            currentHealth = Math.Min(maxHealth, currentHealth + health);
-            OnHealthChange.Invoke(currentHealth);
+            currentHealth = Mathf.Min(maxHealth, currentHealth + health);
         }
 
         public void IncreaseMaxHealth(float value = 1)
         {
-
-            maxHealth = Math.Min(maxHealthValue, maxHealth + value);
-            OnMaxHealthChange.Invoke(maxHealth);
+            maxHealth = Mathf.Min(maxHealthValue, maxHealth + value);
             Heal(maxHealth);
         }
     }

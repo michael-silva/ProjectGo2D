@@ -39,7 +39,7 @@ namespace ProjectGo2D.Platformer
             if (other.gameObject.CompareTag("Player"))
             {
                 animator.SetTrigger("Jump");
-                var player = other.gameObject.GetComponent<Player>();
+                var player = other.gameObject.GetComponent<Movement>();
                 player.Jump(jumpForce);
             }
         }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2796392680459207848}
   - component: {fileID: 2583160186711520767}
   - component: {fileID: 511941528}
-  - component: {fileID: 5968143891534118375}
+  - component: {fileID: 1421566097673081682}
   m_Layer: 0
   m_Name: Fireball
   m_TagString: Untagged
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c26aa1006b4a4549ae0f8f4b02d115a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  power: 0
+  power: 1
   speed: 7
   animator: {fileID: 1324842368038341078}
   direction: {x: 0, y: 0}
@@ -81,7 +81,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.33638197, y: 0.2311742}
   m_EdgeRadius: 0
---- !u!50 &5968143891534118375
+--- !u!50 &1421566097673081682
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -93,10 +93,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 0.0001
+  m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1

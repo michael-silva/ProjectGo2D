@@ -38,11 +38,12 @@ namespace ProjectGo2D.Platformer
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag(originTag)) return;
+            if (other.CompareTag(originTag) || other.CompareTag("Hidden")) return;
             hit = true;
-            var health = other.GetComponent<Health>();
+            var health = other.GetComponent<IHealth>();
             if (health != null)
             {
+                Debug.Log(other.name + " damaged by " + (power * powerMultiplier));
                 health.TakeDamage(power * powerMultiplier);
             }
             boxCollider.enabled = false;

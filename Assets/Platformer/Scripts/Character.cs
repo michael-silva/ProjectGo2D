@@ -8,6 +8,8 @@ namespace ProjectGo2D.Platformer
 {
     public interface ICharacter
     {
+        bool IsOnWall();
+
         void Move(Vector2 direction);
         void Jump(float modifier = 1);
 
@@ -243,6 +245,11 @@ namespace ProjectGo2D.Platformer
             float jumpForce = Mathf.Sqrt(jumpHeight * GetGravity().y * -2);
             velocity.y = jumpForce * modifier;
 
+        }
+
+        public bool IsOnWall()
+        {
+            return isOnWall;
         }
     }
 }

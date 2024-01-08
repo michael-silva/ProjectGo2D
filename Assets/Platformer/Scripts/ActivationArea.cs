@@ -15,11 +15,13 @@ namespace ProjectGo2D.Platformer
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            if (!other.CompareTag("Player")) return;
             StartCoroutine(Activate());
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
+            if (!other.CompareTag("Player")) return;
             StartCoroutine(Deactivate());
         }
 

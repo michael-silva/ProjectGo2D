@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ProjectGo2D.Platformer
 {
-    public class Player : MonoBehaviour, ICharacter
+    public class Movement : MonoBehaviour, ICharacter
     {
         private Rigidbody2D rb;
         private BoxCollider2D boxCollider;
@@ -16,12 +16,10 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private Animator animator;
         [SerializeField] private float speed;
         [SerializeField] private float jumpForce;
-        [SerializeField] private float walljumpInterval;
         [SerializeField, ReadOnly] private bool isGrounded = false;
         [SerializeField, ReadOnly] private bool isOnWall = false;
         [SerializeField, ReadOnly] private bool isAirJumping = false;
         [SerializeField, ReadOnly] private bool isDead = false;
-        [SerializeField, ReadOnly] private float walljumpCooldown;
 
         // Start is called before the first frame update
         void Start()
@@ -29,7 +27,6 @@ namespace ProjectGo2D.Platformer
             rb = GetComponent<Rigidbody2D>();
             boxCollider = GetComponent<BoxCollider2D>();
             defaultGravityScale = rb.gravityScale;
-            walljumpCooldown = walljumpInterval;
         }
 
         // Update is called once per frame
@@ -39,27 +36,7 @@ namespace ProjectGo2D.Platformer
 
             GroundChecking();
             WallChecking();
-            InputControls();
             UpdateAnimations();
-        }
-
-        private void InputControls()
-        {
-            if (walljumpCooldown >= walljumpInterval)
-            {
-                var movement = Input.GetAxis("Horizontal");
-                var direction = new Vector2(movement, 0);
-                Move(direction);
-
-                if (Input.GetButtonDown("Jump"))
-                {
-                    Jump(jumpForce);
-                }
-            }
-            else
-            {
-                walljumpCooldown += Time.deltaTime;
-            }
         }
 
         private void GroundChecking()
@@ -118,6 +95,11 @@ namespace ProjectGo2D.Platformer
             FacingDirection(direction.x);
         }
 
+        public bool IsOnWall()
+        {
+            return isOnWall;
+        }
+
         public bool IsFalling()
         {
             return rb.velocity.y < 0;
@@ -133,16 +115,16 @@ namespace ProjectGo2D.Platformer
             return new Vector2(transform.localScale.x, 0);
         }
 
-        public void Jump(float force)
+        public void Jump(float modifier)
         {
             if (isGrounded)
             {
                 isAirJumping = false;
-                rb.velocity = new Vector2(rb.velocity.x, force);
+                rb.velocity = new Vector2(rb.velocity.x, modifier * jumpForce);
             }
             else if (isOnWall)
             {
-                walljumpCooldown = 0;
+                // walljumpCooldown = 0;
                 Move(GetFacingDirection() * -1);
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             }
