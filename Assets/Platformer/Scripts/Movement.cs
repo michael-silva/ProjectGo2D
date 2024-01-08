@@ -15,10 +15,17 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private LayerMask WallLayer;
         [SerializeField] private Animator animator;
         [SerializeField] private float speed;
+        [SerializeField] private float wallJumpForceX;
+        [SerializeField] private float wallJumpForceY;
+        [SerializeField] private float wallJumpDuration;
+        [SerializeField, ReadOnly] private float wallJumpTimer;
         [SerializeField] private float jumpForce;
+        [SerializeField] private float coyoteTime;
+        [SerializeField] private int extraJumps;
+        [SerializeField, ReadOnly] private float airTimer;
         [SerializeField, ReadOnly] private bool isGrounded = false;
         [SerializeField, ReadOnly] private bool isOnWall = false;
-        [SerializeField, ReadOnly] private bool isAirJumping = false;
+        [SerializeField, ReadOnly] private int jumpCounter;
         [SerializeField, ReadOnly] private bool isDead = false;
 
         // Start is called before the first frame update
@@ -43,10 +50,21 @@ namespace ProjectGo2D.Platformer
         {
             var ray = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.1f, GroundLayer);
             isGrounded = ray.collider != null;
+
+            if (isGrounded)
+            {
+                airTimer = coyoteTime;
+                jumpCounter = extraJumps;
+            }
+            else
+            {
+                airTimer -= Time.deltaTime;
+            }
         }
 
         private void WallChecking()
         {
+            wallJumpTimer += Time.deltaTime;
             if (isGrounded)
             {
                 rb.gravityScale = defaultGravityScale;
@@ -57,7 +75,7 @@ namespace ProjectGo2D.Platformer
             isOnWall = ray.collider != null;
             if (isOnWall)
             {
-                rb.gravityScale = defaultGravityScale / 2;
+                rb.gravityScale = defaultGravityScale / 3;
                 // rb.velocity = Vector2.zero;
             }
             else
@@ -89,6 +107,7 @@ namespace ProjectGo2D.Platformer
 
         public void Move(Vector2 direction)
         {
+            if (wallJumpTimer < wallJumpDuration) return;
             float force = direction.x * speed;
             rb.velocity = new Vector2(force, rb.velocity.y);
             if (!IsWalking()) return;
@@ -117,22 +136,49 @@ namespace ProjectGo2D.Platformer
 
         public void Jump(float modifier)
         {
-            if (isGrounded)
+            if (jumpCounter <= 0 && airTimer <= 0 && !isOnWall) return;
+            if (isOnWall)
             {
-                isAirJumping = false;
-                rb.velocity = new Vector2(rb.velocity.x, modifier * jumpForce);
+                WallJump();
             }
-            else if (isOnWall)
+            else
             {
-                // walljumpCooldown = 0;
-                Move(GetFacingDirection() * -1);
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                if (isGrounded)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, modifier * jumpForce);
+                }
+                else
+                {
+                    if (airTimer > 0)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                    }
+                    else
+                    {
+                        if (jumpCounter > 0)
+                        {
+                            jumpCounter--;
+                            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                        }
+                    }
+                }
+                airTimer = 0;
             }
-            else if (!isAirJumping)
-            {
-                isAirJumping = true;
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
+        }
+
+        public void WallJump()
+        {
+            float dirX = GetFacingDirection().x * -1;
+            FacingDirection(dirX);
+            rb.AddForce(new Vector2(dirX * wallJumpForceX, wallJumpForceY), ForceMode2D.Impulse);
+            wallJumpTimer = 0;
+        }
+
+
+        public void EndJump()
+        {
+            if (rb.velocity.y <= 0 && !isOnWall) return;
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
         }
     }
 }

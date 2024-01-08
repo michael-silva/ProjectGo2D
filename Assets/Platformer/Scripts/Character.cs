@@ -12,6 +12,7 @@ namespace ProjectGo2D.Platformer
 
         void Move(Vector2 direction);
         void Jump(float modifier = 1);
+        void EndJump();
 
         Vector2 GetFacingDirection();
     }

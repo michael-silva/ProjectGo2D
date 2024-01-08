@@ -25,6 +25,7 @@ namespace ProjectGo2D.Platformer
         [SerializeField] private int flashNumbers;
         [SerializeField] private int enemyLayerNumber;
         [SerializeField] private SpriteRenderer sprite;
+        private Respawn respawn;
         private const int minHealthValue = 0;
         private const int maxHealthValue = 10;
         public readonly UnityEvent<float> OnMaxHealthChange = new UnityEvent<float>();
@@ -32,6 +33,7 @@ namespace ProjectGo2D.Platformer
 
         private void Start()
         {
+            respawn = GetComponent<Respawn>();
             OnMaxHealthChange.Invoke(maxHealth);
             OnHealthChange.Invoke(currentHealth);
         }
@@ -66,12 +68,18 @@ namespace ProjectGo2D.Platformer
             Physics2D.IgnoreLayerCollision(gameObject.layer, enemyLayerNumber, false);
         }
 
+        public void Respawn()
+        {
+            animator.SetBool("Dead", false);
+            Heal(maxHealth);
+            StartCoroutine(Invulnerability());
+        }
+
 
         private IEnumerator EndGame()
         {
             yield return new WaitForSeconds(0.8f);
-            Destroy(gameObject);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            respawn.Spawn();
         }
 
         public void Heal(float health)

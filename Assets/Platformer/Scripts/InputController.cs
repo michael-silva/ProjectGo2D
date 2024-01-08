@@ -50,24 +50,17 @@ namespace ProjectGo2D.Platformer
 
         private void Update()
         {
-            if (walljumpCooldown >= walljumpInterval)
-            {
-                var movement = Input.GetAxis("Horizontal");
-                var direction = new Vector2(movement, 0);
-                character.Move(direction);
+            var movement = Input.GetAxis("Horizontal");
+            var direction = new Vector2(movement, 0);
+            character.Move(direction);
 
-                if (Input.GetButtonDown("Jump"))
-                {
-                    character.Jump();
-                    if (character.IsOnWall())
-                    {
-                        walljumpCooldown = 0;
-                    }
-                }
-            }
-            else
+            if (Input.GetButtonDown("Jump"))
             {
-                walljumpCooldown += Time.deltaTime;
+                character.Jump();
+            }
+            if (Input.GetButtonUp("Jump"))
+            {
+                character.EndJump();
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad1))
