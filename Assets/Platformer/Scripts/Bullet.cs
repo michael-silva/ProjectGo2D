@@ -43,7 +43,6 @@ namespace ProjectGo2D.Platformer
             var health = other.GetComponent<IHealth>();
             if (health != null)
             {
-                Debug.Log(other.name + " damaged by " + (power * powerMultiplier));
                 health.TakeDamage(power * powerMultiplier);
             }
             boxCollider.enabled = false;
