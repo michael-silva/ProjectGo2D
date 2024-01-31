@@ -6,6 +6,7 @@ Ready to Level design and build
 
 ## RPG
 
+- Fix enemy target points
 - Enemies spawn items
 - Chests
 - NPCs and dialog system

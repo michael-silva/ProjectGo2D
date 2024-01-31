@@ -16,8 +16,8 @@ namespace ProjectGo2D.Rpg
     {
         float GetSpeed();
         void HealHealth(float heal);
-        void ApplyDamage(ICharacter enemy, DamageType type);
-        void TakeDamage(float enemy, DamageType type);
+        bool ApplyDamage(CharacterBehaviour enemy, DamageType type);
+        bool TakeDamage(float enemy, DamageType type);
     }
 
     public abstract class CharacterBehaviour : MonoBehaviour, ICharacter
@@ -32,8 +32,22 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float speed;
         [SerializeField] private float magic;
         [SerializeField] private float shot;
+        [SerializeField] private float impact;
         [SerializeField] private float criticalChance;
+        [SerializeField] private float invulnerableDuration;
         private bool isInvulnerable;
+        private Vector2 receivedImpact;
+
+
+        public bool IsInvulnerable()
+        {
+            return isInvulnerable;
+        }
+
+        public float GetInvulnerableDuration()
+        {
+            return invulnerableDuration;
+        }
 
         public float GetSpeed()
         {
@@ -52,17 +66,42 @@ namespace ProjectGo2D.Rpg
             health = newHealth;
         }
 
-        public void TakeDamage(float damage, DamageType type)
+        private void ApplyImpact(Vector2 direction, float force)
         {
-            if (isInvulnerable) return;
+            bool received = Random.Range(0, 1) < force;
+            if (!received) return;
+            receivedImpact = direction * force;
+        }
+
+        public bool TakeDamage(float damage, DamageType type)
+        {
+            if (isInvulnerable) return false;
+
             float defend = Random.Range(0, defense);
             float realDamage = Mathf.Max(0, damage - defend);
             float newHealth = Mathf.Max(0, health - realDamage);
+            if (newHealth == health) return false;
             OnHealthChange.Invoke(newHealth, health);
             health = newHealth;
+            StartCoroutine(Invulnerability());
+            return true;
         }
 
-        public void ApplyDamage(ICharacter enemy, DamageType type)
+        protected void Update()
+        {
+            if (receivedImpact == Vector2.zero) return;
+            transform.Translate(receivedImpact * Time.deltaTime);
+        }
+
+        private IEnumerator Invulnerability()
+        {
+            isInvulnerable = true;
+            yield return new WaitForSeconds(invulnerableDuration);
+            receivedImpact = Vector2.zero;
+            isInvulnerable = false;
+        }
+
+        public bool ApplyDamage(CharacterBehaviour enemy, DamageType type)
         {
             float force = strength;
             switch (type)
@@ -75,7 +114,13 @@ namespace ProjectGo2D.Rpg
                     break;
             }
             float damage = Random.Range(0, 1) < criticalChance ? force * 2 : force;
-            enemy.TakeDamage(damage, type);
+            if (enemy.TakeDamage(damage, type))
+            {
+                var dir = enemy.transform.position - transform.position;
+                dir.Normalize();
+                enemy.ApplyImpact(dir, impact);
+            }
+            return false;
         }
     }
 
@@ -88,10 +133,9 @@ namespace ProjectGo2D.Rpg
 
         }
 
-        // Update is called once per frame
-        void Update()
+        private new void Update()
         {
-
+            base.Update();
         }
     }
 }

@@ -8,7 +8,6 @@ namespace ProjectGo2D.Rpg
     {
         [SerializeField] private PlayerController player;
         [SerializeField] private CharacterBehaviour character;
-        [SerializeField] private float invulnerableDuration;
         [SerializeField] private int flashNumbers;
         private Animator animator;
         private SpriteRenderer spriteRenderer;
@@ -48,8 +47,7 @@ namespace ProjectGo2D.Rpg
 
         private IEnumerator BlinkSprite()
         {
-            character.SetInvulnerable(true);
-            float interval = invulnerableDuration / (flashNumbers * 2);
+            float interval = character.GetInvulnerableDuration() / (flashNumbers * 2);
             for (int i = 0; i < flashNumbers; i++)
             {
                 spriteRenderer.color = Color.red;
@@ -57,7 +55,6 @@ namespace ProjectGo2D.Rpg
                 spriteRenderer.color = Color.white;
                 yield return new WaitForSeconds(interval);
             }
-            character.SetInvulnerable(false);
         }
 
         public void FinishAttack()

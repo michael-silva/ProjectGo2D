@@ -9,6 +9,7 @@ namespace ProjectGo2D.Rpg
     public class SlimeAI : MonoBehaviour
     {
         [SerializeField] private Animator animator;
+        [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private float actionInterval;
         [SerializeField] private float viewDistance;
         [SerializeField] private float attackDuration;
@@ -35,6 +36,7 @@ namespace ProjectGo2D.Rpg
         // Update is called once per frame
         void Update()
         {
+            if (character.IsInvulnerable()) return;
             actionTimer += Time.deltaTime;
             if (actionTimer < actionInterval)
             {
@@ -130,7 +132,21 @@ namespace ProjectGo2D.Rpg
             }
             else if (newHealth < oldHealth)
             {
-                animator.SetTrigger("Hit");
+                animator.SetBool("Walking", false);
+                StartCoroutine(BlinkSprite());
+            }
+        }
+
+        private IEnumerator BlinkSprite()
+        {
+            float flashNumbers = 4;
+            float interval = character.GetInvulnerableDuration() / (flashNumbers * 2);
+            for (int i = 0; i < flashNumbers; i++)
+            {
+                spriteRenderer.color = Color.red;
+                yield return new WaitForSeconds(interval);
+                spriteRenderer.color = Color.white;
+                yield return new WaitForSeconds(interval);
             }
         }
 

@@ -7,6 +7,7 @@ namespace ProjectGo2D.Rpg
 {
     public class Hitbox : MonoBehaviour
     {
+        [SerializeField] private ParticleSystem hitEffect;
         [SerializeField, TagField] private string hitTag;
         [SerializeField] private CharacterBehaviour character;
         [SerializeField] private DamageType damageType;
@@ -27,7 +28,11 @@ namespace ProjectGo2D.Rpg
             if (!other.CompareTag(hitTag)) return;
             var enemy = other.GetComponent<ICharacter>();
             if (enemy == null) return;
-            character.ApplyDamage(enemy, damageType);
+            if (character.ApplyDamage(enemy as CharacterBehaviour, damageType))
+            {
+                hitEffect.transform.position = other.transform.position;
+                hitEffect.Play();
+            }
         }
     }
 }

@@ -10,19 +10,23 @@ namespace ProjectGo2D.Rpg
     public class PlayerController : MonoBehaviour
     {
         public readonly UnityEvent OnAttack = new UnityEvent();
+        [SerializeField] private ParticleSystem dustParticles;
         [SerializeField] private BoxCollider2D swordHorizontalHitbox;
         [SerializeField] private BoxCollider2D swordVerticalHitbox;
         [SerializeField, ReadOnly] private Vector2 swordHorizontalHitboxOffset;
         [SerializeField, ReadOnly] private Vector2 swordVerticalHitboxOffset;
-        [SerializeField] private CharacterBehaviour character;
         [SerializeField] private float collisionDownOffset;
         [SerializeField] private float collisionUpOffset;
         [SerializeField] private float collisionDistance;
+        [SerializeField] private float attackCooldown;
         [SerializeField] private LayerMask collisionLayer;
         [SerializeField, ReadOnly] private Vector2 direction;
+
+        [SerializeField, ReadOnly] private bool lockControls;
+        private CharacterBehaviour character;
         private BoxCollider2D boxCollider;
         private PlayerInputActions inputActions;
-        private bool lockMovement;
+        private float attackTimer;
 
         void Start()
         {
@@ -38,7 +42,8 @@ namespace ProjectGo2D.Rpg
 
         void Update()
         {
-            if (lockMovement) return;
+            if (lockControls) return;
+            attackTimer += Time.deltaTime;
             var inputVector = inputActions.Player.Move.ReadValue<Vector2>();
             var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
             if (movement != Vector2.zero)
@@ -53,6 +58,21 @@ namespace ProjectGo2D.Rpg
                 {
                     TryMove(new Vector2(0, direction.y));
                 }
+                if (moved)
+                {
+
+                    dustParticles.Play();
+                }
+                else
+                {
+
+                    dustParticles.Stop();
+                }
+            }
+            else
+            {
+                direction = Vector2.zero;
+                dustParticles.Stop();
             }
         }
 
@@ -68,7 +88,7 @@ namespace ProjectGo2D.Rpg
             if (newHealth == 0)
             {
                 boxCollider.enabled = false;
-                LockMovement();
+                LockControls();
             }
         }
 
@@ -124,13 +144,15 @@ namespace ProjectGo2D.Rpg
 
         public void StartAttack()
         {
+            if (lockControls || attackTimer < attackCooldown) return;
             OnAttack.Invoke();
-            LockMovement();
+            LockControls();
             EnableHitbox();
         }
 
         public void StopAttack()
         {
+            attackTimer = 0;
             UnlockMovement();
             DisableHitbox();
         }
@@ -142,16 +164,16 @@ namespace ProjectGo2D.Rpg
 
         public bool IsMoving()
         {
-            return direction != Vector2.zero && !lockMovement;
+            return direction != Vector2.zero && !lockControls;
         }
 
-        public void LockMovement()
+        public void LockControls()
         {
-            lockMovement = true;
+            lockControls = true;
         }
         public void UnlockMovement()
         {
-            lockMovement = false;
+            lockControls = false;
         }
     }
 }
