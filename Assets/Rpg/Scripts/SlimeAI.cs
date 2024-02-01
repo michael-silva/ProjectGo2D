@@ -65,14 +65,14 @@ namespace ProjectGo2D.Rpg
             {
                 animator.SetBool("Walking", true);
                 direction = movement;
-                bool moved = TryMove(direction);
+                bool moved = character.TryMove(boxCollider, direction, collisionDistance, collisionLayer);
                 if (!moved)
                 {
-                    moved = TryMove(new Vector2(direction.x, 0));
+                    moved = character.TryMove(boxCollider, new Vector2(direction.x, 0), collisionDistance, collisionLayer);
                 }
                 if (!moved)
                 {
-                    TryMove(new Vector2(0, direction.y));
+                    character.TryMove(boxCollider, new Vector2(0, direction.y), collisionDistance, collisionLayer);
                 }
 
                 if (direction.x < 0)
@@ -148,18 +148,6 @@ namespace ProjectGo2D.Rpg
                 spriteRenderer.color = Color.white;
                 yield return new WaitForSeconds(interval);
             }
-        }
-
-        private bool TryMove(Vector2 direction)
-        {
-            var position = boxCollider.bounds.center;
-            var hit = Physics2D.BoxCast(position, boxCollider.bounds.size, 0, direction, collisionDistance, collisionLayer);
-            if (hit.collider == null)
-            {
-                transform.Translate(direction * character.GetSpeed() * Time.deltaTime);
-                return true;
-            }
-            return false;
         }
 
         private Transform SeePlayerInRange()

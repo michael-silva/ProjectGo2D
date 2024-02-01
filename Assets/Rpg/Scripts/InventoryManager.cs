@@ -1,22 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ProjectGo2D.Rpg
 {
-    public class Player : CharacterBehaviour
+    public class InventoryManager : MonoBehaviour
     {
-
         // Start is called before the first frame update
         void Start()
         {
-
+        
         }
 
-        private new void Update()
+        // Update is called once per frame
+        void Update()
         {
-            base.Update();
+        
         }
     }
 }

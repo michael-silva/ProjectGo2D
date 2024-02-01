@@ -20,6 +20,8 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float collisionDistance;
         [SerializeField] private float attackCooldown;
         [SerializeField] private LayerMask collisionLayer;
+        [SerializeField] private LayerMask interactionLayer;
+        [SerializeField] private LayerMask collectableLayer;
         [SerializeField, ReadOnly] private Vector2 direction;
 
         [SerializeField, ReadOnly] private bool lockControls;
@@ -27,6 +29,7 @@ namespace ProjectGo2D.Rpg
         private BoxCollider2D boxCollider;
         private PlayerInputActions inputActions;
         private float attackTimer;
+        private IInteractive interactiveFocus;
 
         void Start()
         {
@@ -45,35 +48,9 @@ namespace ProjectGo2D.Rpg
             if (lockControls) return;
             attackTimer += Time.deltaTime;
             var inputVector = inputActions.Player.Move.ReadValue<Vector2>();
-            var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
-            if (movement != Vector2.zero)
-            {
-                direction = movement;
-                bool moved = TryMove(direction);
-                if (!moved)
-                {
-                    moved = TryMove(new Vector2(direction.x, 0));
-                }
-                if (!moved)
-                {
-                    TryMove(new Vector2(0, direction.y));
-                }
-                if (moved)
-                {
-
-                    dustParticles.Play();
-                }
-                else
-                {
-
-                    dustParticles.Stop();
-                }
-            }
-            else
-            {
-                direction = Vector2.zero;
-                dustParticles.Stop();
-            }
+            ApplyMovement(inputVector);
+            TestInteraction();
+            TestCollectables();
         }
 
         private void OnDrawGizmos()
@@ -81,6 +58,53 @@ namespace ProjectGo2D.Rpg
             if (!boxCollider) return;
             var position = GetColliderCenter(direction);
             Gizmos.DrawWireCube(position, boxCollider.bounds.size);
+        }
+
+        private void TestCollectables()
+        {
+            if (!IsMoving()) return;
+            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, direction, collisionDistance, collectableLayer);
+            var collectable = hit.collider?.GetComponent<IICollectable>();
+            if (collectable == null) return;
+            collectable.Collect(character);
+        }
+
+        private void TestInteraction()
+        {
+            if (!IsMoving()) return;
+            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, direction, collisionDistance, interactionLayer);
+            var interactive = hit.collider?.GetComponent<IInteractive>();
+            if (interactive == interactiveFocus) return;
+            if (interactiveFocus != null) interactiveFocus.Disable();
+            if (interactive != null) interactive.Enable();
+            interactiveFocus = interactive;
+        }
+
+        private void ApplyMovement(Vector2 inputVector)
+        {
+            var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
+            if (movement != Vector2.zero)
+            {
+                direction = movement;
+                bool moved = character.TryMove(boxCollider, direction, collisionDistance, collisionLayer);
+                if (!moved)
+                {
+                    moved = character.TryMove(boxCollider, new Vector2(direction.x, 0), collisionDistance, collisionLayer);
+                }
+                if (!moved)
+                {
+                    character.TryMove(boxCollider, new Vector2(0, direction.y), collisionDistance, collisionLayer);
+                }
+                if (moved && dustParticles.isStopped)
+                {
+                    dustParticles.Play();
+                }
+            }
+            else
+            {
+                direction = Vector2.zero;
+                dustParticles.Stop();
+            }
         }
 
         private void HandleHealthChanged(float newHealth, float oldHealth)
@@ -104,18 +128,6 @@ namespace ProjectGo2D.Rpg
             //     position.y += collisionDownOffset;
             // }
             // return position;
-        }
-
-        private bool TryMove(Vector2 direction)
-        {
-            var position = GetColliderCenter(direction);
-            var hit = Physics2D.BoxCast(position, boxCollider.bounds.size, 0, direction, collisionDistance, collisionLayer);
-            if (hit.collider == null)
-            {
-                transform.Translate(direction * character.GetSpeed() * Time.deltaTime);
-                return true;
-            }
-            return false;
         }
 
         private void EnableHitbox()
@@ -144,6 +156,11 @@ namespace ProjectGo2D.Rpg
 
         public void StartAttack()
         {
+            if (interactiveFocus != null)
+            {
+                interactiveFocus.Interact();
+                return;
+            }
             if (lockControls || attackTimer < attackCooldown) return;
             OnAttack.Invoke();
             LockControls();
