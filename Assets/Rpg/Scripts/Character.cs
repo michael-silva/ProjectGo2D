@@ -60,6 +60,21 @@ namespace ProjectGo2D.Rpg
             return speed;
         }
 
+        public float GetHealthPercent()
+        {
+            return health / maxHealth;
+        }
+
+        public float GetManaPercent()
+        {
+            return mana / maxMana;
+        }
+
+        public float GetMoney()
+        {
+            return money;
+        }
+
         public void SetInvulnerable(bool value)
         {
             isInvulnerable = value;
@@ -67,8 +82,8 @@ namespace ProjectGo2D.Rpg
 
         public void HealHealth(float heal)
         {
-            float newHealth = Mathf.Min(maxHealth, health + heal);
-            OnHealthChange.Invoke(newHealth, health);
+            float newHealth = Mathf.Clamp(health + heal, 0, maxHealth);
+            OnHealthChange.Invoke(health, newHealth);
             health = newHealth;
         }
 
@@ -147,14 +162,14 @@ namespace ProjectGo2D.Rpg
         public void AddMoney(float value)
         {
             float newMoney = Mathf.Clamp(money + value, 0, MAX_MONEY);
-            OnMoneyChange.Invoke(newMoney, money);
+            OnMoneyChange.Invoke(money, newMoney);
             money = newMoney;
         }
 
         public void FillMana(float value)
         {
             float newMana = Mathf.Clamp(mana + value, 0, maxMana);
-            OnManaChange.Invoke(newMana, money);
+            OnManaChange.Invoke(money, newMana);
             mana = newMana;
         }
     }

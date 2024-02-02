@@ -8,6 +8,7 @@ namespace ProjectGo2D.Rpg
 {
     public class SlimeAI : MonoBehaviour
     {
+        [SerializeField] private List<SpawnItem> items;
         [SerializeField] private Animator animator;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private float actionInterval;
@@ -129,6 +130,7 @@ namespace ProjectGo2D.Rpg
                 animator.SetTrigger("Die");
                 boxCollider.enabled = false;
                 enabled = false;
+                SpawnItem.Spawn(items, transform);
             }
             else if (newHealth < oldHealth)
             {

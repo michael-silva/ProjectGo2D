@@ -8,17 +8,6 @@ namespace ProjectGo2D.Rpg
     {
         [SerializeField] private float value;
 
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
 
         public override void Collect(ICharacter character)
         {
