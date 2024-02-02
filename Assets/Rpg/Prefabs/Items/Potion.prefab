@@ -116,7 +116,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2105926183959435602}
   - component: {fileID: 2105926183959435628}
-  - component: {fileID: 2105926183959435629}
+  - component: {fileID: 5287842376737792920}
   m_Layer: 7
   m_Name: Potion
   m_TagString: Untagged
@@ -168,7 +168,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.104439735, y: 0.09747037}
   m_EdgeRadius: 0
---- !u!114 &2105926183959435629
+--- !u!114 &5287842376737792920
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2105926183959435603}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 701447bad02d8f04c9d256639891f760, type: 3}
+  m_Script: {fileID: 11500000, guid: 682306953bc6f8b4ead10570842cbb91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   friction: 0.9
@@ -189,7 +189,7 @@ MonoBehaviour:
     m_Bits: 2048
   animator: {fileID: 2105926182604141106}
   movement: {x: 0, y: 0}
-  value: 50
+  item: {fileID: 1730134705976499684, guid: a79966ee80413a94481aa151e1f7cedb, type: 3}
 --- !u!1 &2987031364584412127
 GameObject:
   m_ObjectHideFlags: 0

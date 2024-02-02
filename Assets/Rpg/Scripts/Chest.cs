@@ -34,21 +34,9 @@ namespace ProjectGo2D.Rpg
         }
     }
 
-    public class Chest : MonoBehaviour, IInteractive
+    public abstract class InteractiveBehaviour : MonoBehaviour, IInteractive
     {
-        [SerializeField] private Animator animator;
-        [SerializeField] private List<SpawnItem> items;
-        private bool active;
-
-        // Start is called before the first frame update
-        void Start()
-        {
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        }
+        protected bool active;
 
         public void Disable()
         {
@@ -64,7 +52,26 @@ namespace ProjectGo2D.Rpg
             WorldUIManager.Instance.ShowInteractive(transform.position);
         }
 
-        public void Interact()
+        public abstract void Interact();
+
+    }
+
+    public class Chest : InteractiveBehaviour
+    {
+        [SerializeField] private Animator animator;
+        [SerializeField] private List<SpawnItem> items;
+
+        // Start is called before the first frame update
+        void Start()
+        {
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+        }
+
+        public override void Interact()
         {
             if (!active || !enabled) return;
             animator.SetTrigger("Active");

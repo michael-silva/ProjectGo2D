@@ -94,7 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4459224184440111613}
   - component: {fileID: 4459224184440111611}
-  - component: {fileID: 4459224184440111610}
+  - component: {fileID: 719654265340795888}
   m_Layer: 7
   m_Name: Ether
   m_TagString: Untagged
@@ -146,7 +146,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.13657767, y: 0.12046039}
   m_EdgeRadius: 0
---- !u!114 &4459224184440111610
+--- !u!114 &719654265340795888
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4459224184440111612}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52f1cdd0f82bacb459e08e9cb2b00246, type: 3}
+  m_Script: {fileID: 11500000, guid: 682306953bc6f8b4ead10570842cbb91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   friction: 0.9
@@ -167,7 +167,7 @@ MonoBehaviour:
     m_Bits: 2048
   animator: {fileID: 4459224185817195445}
   movement: {x: 0, y: 0}
-  value: 20
+  item: {fileID: 3017259788023901847, guid: 68fab766e1e61b847ba3fb3e19687038, type: 3}
 --- !u!1 &4459224185817195447
 GameObject:
   m_ObjectHideFlags: 0

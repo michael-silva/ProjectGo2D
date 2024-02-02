@@ -6,10 +6,10 @@ Ready to Level design and build
 
 ## RPG
 
-- NPCs and dialog system
-- Inventory
-- XP and Level points distribution
-- Weapon and spells equip
+- Variation of weapons ans spells
+- Inventory UI
+- XP and Level points distribution UI
+- Weapon and spells equip UI
 - Variation of enemies
 - Ready to Level design and build
 

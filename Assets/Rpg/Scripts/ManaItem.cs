@@ -4,15 +4,13 @@ using UnityEngine;
 
 namespace ProjectGo2D.Rpg
 {
-    public class ManaItem : CollectableBehaviour
+    public class ManaItem : InventoryItemBehaviour
     {
         [SerializeField] private float value;
 
-        public override void Collect(ICharacter character)
+        public override void Use(ICharacter character)
         {
-            if (!enabled) return;
             character.FillMana(value);
-            base.Collect();
         }
 
     }

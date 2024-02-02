@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ProjectGo2D.Shared;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,6 +8,7 @@ using UnityEngine.InputSystem;
 
 namespace ProjectGo2D.Rpg
 {
+
     public class PlayerController : MonoBehaviour
     {
         public readonly UnityEvent OnAttack = new UnityEvent();
@@ -27,7 +29,6 @@ namespace ProjectGo2D.Rpg
         [SerializeField, ReadOnly] private bool lockControls;
         private CharacterBehaviour character;
         private BoxCollider2D boxCollider;
-        private PlayerInputActions inputActions;
         private float attackTimer;
         private IInteractive interactiveFocus;
 
@@ -35,9 +36,6 @@ namespace ProjectGo2D.Rpg
         {
             character = GetComponent<CharacterBehaviour>();
             boxCollider = GetComponent<BoxCollider2D>();
-            inputActions = new PlayerInputActions();
-            inputActions.Player.Attack.performed += context => StartAttack();
-            inputActions.Player.Enable();
             swordHorizontalHitboxOffset = swordHorizontalHitbox.transform.localPosition;
             swordVerticalHitboxOffset = swordVerticalHitbox.transform.localPosition;
             character.OnHealthChange.AddListener(HandleHealthChanged);
@@ -47,7 +45,7 @@ namespace ProjectGo2D.Rpg
         {
             if (lockControls) return;
             attackTimer += Time.deltaTime;
-            var inputVector = inputActions.Player.Move.ReadValue<Vector2>();
+            var inputVector = InputManager.Instance.GetMovementVector();
             ApplyMovement(inputVector);
             TestInteraction();
             TestCollectables();
@@ -156,15 +154,17 @@ namespace ProjectGo2D.Rpg
 
         public void StartAttack()
         {
-            if (interactiveFocus != null)
-            {
-                interactiveFocus.Interact();
-                return;
-            }
             if (lockControls || attackTimer < attackCooldown) return;
             OnAttack.Invoke();
             LockControls();
             EnableHitbox();
+        }
+
+        public bool TryInteract()
+        {
+            if (interactiveFocus == null) return false;
+            interactiveFocus.Interact();
+            return true;
         }
 
         public void StopAttack()

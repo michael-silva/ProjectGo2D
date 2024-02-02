@@ -8,6 +8,7 @@ namespace ProjectGo2D.Rpg
 {
     public class UIManager : MonoBehaviour
     {
+        public static UIManager Instance { get; private set; }
         [SerializeField] private CharacterBehaviour character;
         // [SerializeField] private Image totalHealthbar;
         [SerializeField] private Image currentHealthbar;
@@ -17,6 +18,15 @@ namespace ProjectGo2D.Rpg
 
         void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                Instance = this;
+            }
+
             UpdateMana();
             UpdateHealth();
             UpdateMoney(character.GetMoney());

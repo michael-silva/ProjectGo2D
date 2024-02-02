@@ -1,10 +1,54 @@
 using System.Collections;
 using System.Collections.Generic;
+using ProjectGo2D.Shared;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace ProjectGo2D.Rpg
 {
+    [System.Serializable]
+    public struct InventorySlot
+    {
+        public IInventoryItem item;
+        public int quantity;
+
+        public InventorySlot(IInventoryItem item)
+        {
+            this.item = item;
+            this.quantity = 1;
+        }
+    }
+
+    [System.Serializable]
+    public class Inventory
+    {
+        [SerializeField] private int maxSlots;
+        [SerializeField] private int rows;
+        [SerializeField, ReadOnly] private List<InventorySlot> slots;
+
+        public int IndexOf(IInventoryItem item)
+        {
+            return slots.FindIndex(slot => slot.item.GetID() == item.GetID());
+        }
+
+        public bool TryAddItem(IInventoryItem item)
+        {
+            int index = IndexOf(item);
+            if (index == -1)
+            {
+                if (slots.Count >= maxSlots) return false;
+                slots.Add(new InventorySlot(item));
+                return true;
+            }
+            else
+            {
+                var slot = slots[index];
+                slot.quantity++;
+                return true;
+            }
+        }
+    }
+
     public enum DamageType
     {
         Melee,
@@ -17,9 +61,11 @@ namespace ProjectGo2D.Rpg
         float GetSpeed();
         void HealHealth(float heal);
         void FillMana(float value);
+        void GainXP(float value);
         bool ApplyDamage(CharacterBehaviour enemy, DamageType type);
-        bool TakeDamage(float enemy, DamageType type);
+        // bool TakeDamage(float enemy, DamageType type);
         void AddMoney(float value);
+        bool TryAddToInventory(IInventoryItem item);
     }
 
     public abstract class CharacterBehaviour : MonoBehaviour, ICharacter
@@ -31,6 +77,11 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float health;
         [SerializeField] private float mana;
         [SerializeField] private float money;
+        [SerializeField] private float exp;
+        [SerializeField] private float levelUpXp;
+        [SerializeField] private float levelUpIncreaseRate;
+        [SerializeField] private int level;
+        [SerializeField] private int levelPoints;
         [SerializeField] private float maxHealth;
         [SerializeField] private float maxMana;
         [SerializeField] private float strength;
@@ -41,6 +92,7 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float impact;
         [SerializeField] private float criticalChance;
         [SerializeField] private float invulnerableDuration;
+        [SerializeField] private Inventory inventory;
         private bool isInvulnerable;
         private Vector2 receivedImpact;
 
@@ -94,7 +146,12 @@ namespace ProjectGo2D.Rpg
             receivedImpact = direction * force;
         }
 
-        public bool TakeDamage(float damage, DamageType type)
+        public bool IsDead()
+        {
+            return health == 0;
+        }
+
+        private bool TakeDamage(float damage, DamageType type)
         {
             if (isInvulnerable) return false;
 
@@ -140,9 +197,16 @@ namespace ProjectGo2D.Rpg
             float damage = Random.Range(0, 1) < criticalChance ? force * 2 : force;
             if (enemy.TakeDamage(damage, type))
             {
+                if (enemy.IsDead())
+                {
+                    GainXP(enemy.GetXP());
+                    return true;
+                }
+                // StartCoroutine(Invulnerability());
                 var dir = enemy.transform.position - transform.position;
                 dir.Normalize();
                 enemy.ApplyImpact(dir, impact);
+                return true;
             }
             return false;
         }
@@ -171,6 +235,42 @@ namespace ProjectGo2D.Rpg
             float newMana = Mathf.Clamp(mana + value, 0, maxMana);
             OnManaChange.Invoke(money, newMana);
             mana = newMana;
+        }
+
+        public float GetXP()
+        {
+            return exp;
+        }
+
+        public void GainXP(float value)
+        {
+            float nextExp = exp + value;
+            if (nextExp >= levelUpXp)
+            {
+                exp = nextExp - levelUpXp;
+                levelUpXp *= levelUpIncreaseRate;
+                level++;
+            }
+            else
+            {
+                exp = nextExp;
+            }
+        }
+
+        public bool TryAddToInventory(IInventoryItem item)
+        {
+            return inventory.TryAddItem(item);
+        }
+
+        public int GetAvailablePoints()
+        {
+            return level - levelPoints;
+        }
+
+        public int ApplyLevelPoint()
+        {
+            levelPoints--;
+            return GetAvailablePoints();
         }
     }
 

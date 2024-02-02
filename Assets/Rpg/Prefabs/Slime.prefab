@@ -167,6 +167,11 @@ MonoBehaviour:
   health: 100
   mana: 0
   money: 0
+  exp: 15
+  levelUpXp: 0
+  levelUpIncreaseRate: 0
+  level: 0
+  levelPoints: 0
   maxHealth: 100
   maxMana: 0
   strength: 2
@@ -177,6 +182,10 @@ MonoBehaviour:
   impact: 0.1
   criticalChance: 0
   invulnerableDuration: 0.5
+  inventory:
+    maxSlots: 0
+    rows: 0
+    slots: []
 --- !u!114 &5711437617030286095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,10 +199,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - collectable: {fileID: 2105926183959435629, guid: 967ddc6b60919414b9a78512ae88fb60, type: 3}
+  - collectable: {fileID: 719654265340795888, guid: b2be496052385654686d6241255653e6, type: 3}
     chance: 0.2
     quantity: 1
-  - collectable: {fileID: 4459224184440111610, guid: b2be496052385654686d6241255653e6, type: 3}
+  - collectable: {fileID: 5287842376737792920, guid: 967ddc6b60919414b9a78512ae88fb60, type: 3}
     chance: 0.2
     quantity: 1
   - collectable: {fileID: 3681433786154165309, guid: 6ea0f983cd06ab841be13b001f91a1ac, type: 3}
