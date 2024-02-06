@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,57 +12,57 @@ namespace ProjectGo2D.Rpg
 
     public class PlayerController : MonoBehaviour
     {
-        public readonly UnityEvent OnAttack = new UnityEvent();
         [SerializeField] private ParticleSystem dustParticles;
-        [SerializeField] private BoxCollider2D swordHorizontalHitbox;
-        [SerializeField] private BoxCollider2D swordVerticalHitbox;
-        [SerializeField, ReadOnly] private Vector2 swordHorizontalHitboxOffset;
-        [SerializeField, ReadOnly] private Vector2 swordVerticalHitboxOffset;
         [SerializeField] private float collisionDownOffset;
         [SerializeField] private float collisionUpOffset;
         [SerializeField] private float collisionDistance;
-        [SerializeField] private float attackCooldown;
+        [SerializeField] private CharacterSkill primarySkill;
+        [SerializeField] private CharacterSkill secondarySkill;
+        [SerializeField] private List<CharacterSkill> availableSecondarySkills;
         [SerializeField] private LayerMask collisionLayer;
         [SerializeField] private LayerMask interactionLayer;
         [SerializeField] private LayerMask collectableLayer;
-        [SerializeField, ReadOnly] private Vector2 direction;
 
         [SerializeField, ReadOnly] private bool lockControls;
         private CharacterBehaviour character;
         private BoxCollider2D boxCollider;
-        private float attackTimer;
         private IInteractive interactiveFocus;
 
         void Start()
         {
             character = GetComponent<CharacterBehaviour>();
             boxCollider = GetComponent<BoxCollider2D>();
-            swordHorizontalHitboxOffset = swordHorizontalHitbox.transform.localPosition;
-            swordVerticalHitboxOffset = swordVerticalHitbox.transform.localPosition;
+            primarySkill.OnSkillFinished.AddListener(() => SkillEnded(primarySkill));
+            secondarySkill.OnSkillFinished.AddListener(() => SkillEnded(secondarySkill));
             character.OnHealthChange.AddListener(HandleHealthChanged);
+            InputManager.Instance.OnActionStarted.AddListener(MainActionStarted);
+            InputManager.Instance.OnActionCalled.AddListener(() => ExecuteSkill(primarySkill));
+            InputManager.Instance.OnActionReleased.AddListener(() => ReleaseSkill(primarySkill));
+            InputManager.Instance.OnSecondaryActionStarted.AddListener(() => PrepareSkill(secondarySkill));
+            InputManager.Instance.OnSecondaryActionCalled.AddListener(() => ExecuteSkill(secondarySkill));
+            InputManager.Instance.OnSecondaryActionReleased.AddListener(() => ReleaseSkill(secondarySkill));
         }
 
         void Update()
         {
             if (lockControls) return;
-            attackTimer += Time.deltaTime;
             var inputVector = InputManager.Instance.GetMovementVector();
             ApplyMovement(inputVector);
             TestInteraction();
             TestCollectables();
+
         }
 
         private void OnDrawGizmos()
         {
             if (!boxCollider) return;
-            var position = GetColliderCenter(direction);
-            Gizmos.DrawWireCube(position, boxCollider.bounds.size);
+            Gizmos.DrawWireCube(transform.position, boxCollider.bounds.size);
         }
 
         private void TestCollectables()
         {
             if (!IsMoving()) return;
-            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, direction, collisionDistance, collectableLayer);
+            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, character.GetDirection(), collisionDistance, collectableLayer);
             var collectable = hit.collider?.GetComponent<IICollectable>();
             if (collectable == null) return;
             collectable.Collect(character);
@@ -70,7 +71,7 @@ namespace ProjectGo2D.Rpg
         private void TestInteraction()
         {
             if (!IsMoving()) return;
-            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, direction, collisionDistance, interactionLayer);
+            var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, character.GetDirection(), collisionDistance, interactionLayer);
             var interactive = hit.collider?.GetComponent<IInteractive>();
             if (interactive == interactiveFocus) return;
             if (interactiveFocus != null) interactiveFocus.Disable();
@@ -80,18 +81,18 @@ namespace ProjectGo2D.Rpg
 
         private void ApplyMovement(Vector2 inputVector)
         {
-            var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
+            var movement = character.HasReceivedImpact() ? character.GetReceivedImpact() : new Vector2(inputVector.normalized.x, inputVector.normalized.y);
             if (movement != Vector2.zero)
             {
-                direction = movement;
-                bool moved = character.TryMove(boxCollider, direction, collisionDistance, collisionLayer);
+                character.SetDirection(movement);
+                bool moved = character.TryMove(boxCollider, movement, collisionDistance, collisionLayer);
                 if (!moved)
                 {
-                    moved = character.TryMove(boxCollider, new Vector2(direction.x, 0), collisionDistance, collisionLayer);
+                    moved = character.TryMove(boxCollider, new Vector2(movement.x, 0), collisionDistance, collisionLayer);
                 }
                 if (!moved)
                 {
-                    character.TryMove(boxCollider, new Vector2(0, direction.y), collisionDistance, collisionLayer);
+                    character.TryMove(boxCollider, new Vector2(0, movement.y), collisionDistance, collisionLayer);
                 }
                 if (moved && dustParticles.isStopped)
                 {
@@ -100,7 +101,7 @@ namespace ProjectGo2D.Rpg
             }
             else
             {
-                direction = Vector2.zero;
+                // character.SetDirection(Vector2.zero);
                 dustParticles.Stop();
             }
         }
@@ -128,36 +129,38 @@ namespace ProjectGo2D.Rpg
             // return position;
         }
 
-        private void EnableHitbox()
+        private void MainActionStarted()
         {
-            var isHorizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.y);
-            if (isHorizontal)
-            {
-                float x = direction.x < 0 ? -swordHorizontalHitboxOffset.x : swordHorizontalHitboxOffset.x;
-                swordHorizontalHitbox.transform.localPosition = new Vector2(x, swordHorizontalHitboxOffset.y);
-                swordHorizontalHitbox.enabled = true;
-            }
-            else
-            {
-                float y = direction.y >= 0 ? -swordVerticalHitboxOffset.y : swordVerticalHitboxOffset.y;
-                swordVerticalHitbox.transform.localPosition = new Vector2(swordVerticalHitboxOffset.x, y);
-                swordVerticalHitbox.enabled = true;
-
-            }
+            if (Time.timeScale == 0) return;
+            if (TryInteract()) return;
+            PrepareSkill(primarySkill);
         }
 
-        private void DisableHitbox()
+        public void PrepareSkill(CharacterSkill skill)
         {
-            swordHorizontalHitbox.enabled = false;
-            swordVerticalHitbox.enabled = false;
+            if (lockControls) return;
+            skill.Prepare();
         }
 
-        public void StartAttack()
+        public void ExecuteSkill(CharacterSkill skill)
         {
-            if (lockControls || attackTimer < attackCooldown) return;
-            OnAttack.Invoke();
+            if (Time.timeScale == 0) return;
+            if (!skill.TryExecute()) return;
+            if (!skill.NeedToLockControls()) return;
             LockControls();
-            EnableHitbox();
+        }
+
+        public void ReleaseSkill(CharacterSkill skill)
+        {
+            if (Time.timeScale == 0) return;
+            if (lockControls) return;
+            skill.Release();
+        }
+
+        public void SkillEnded(CharacterSkill skill)
+        {
+            if (!skill.NeedToLockControls()) return;
+            UnlockControls();
         }
 
         public bool TryInteract()
@@ -167,28 +170,16 @@ namespace ProjectGo2D.Rpg
             return true;
         }
 
-        public void StopAttack()
-        {
-            attackTimer = 0;
-            UnlockMovement();
-            DisableHitbox();
-        }
-
-        public Vector2 GetDirection()
-        {
-            return direction;
-        }
-
         public bool IsMoving()
         {
-            return direction != Vector2.zero && !lockControls;
+            return character.GetDirection() != Vector2.zero && !lockControls;
         }
 
         public void LockControls()
         {
             lockControls = true;
         }
-        public void UnlockMovement()
+        public void UnlockControls()
         {
             lockControls = false;
         }

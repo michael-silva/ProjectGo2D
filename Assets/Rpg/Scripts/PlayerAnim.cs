@@ -17,14 +17,13 @@ namespace ProjectGo2D.Rpg
             animator = GetComponent<Animator>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             character.OnHealthChange.AddListener(HandleHealthChanged);
-            player.OnAttack.AddListener(() => animator.SetTrigger("Attack"));
         }
 
         // Update is called once per frame
         void Update()
         {
             bool isMoving = player.IsMoving();
-            var direction = player.GetDirection();
+            var direction = character.GetDirection();
             animator.SetBool("Walking", isMoving);
             if (isMoving)
             {
@@ -33,7 +32,7 @@ namespace ProjectGo2D.Rpg
             }
         }
 
-        private void HandleHealthChanged(float newHealth, float oldHealth)
+        private void HandleHealthChanged(float oldHealth, float newHealth)
         {
             if (newHealth == 0)
             {
@@ -57,9 +56,14 @@ namespace ProjectGo2D.Rpg
             }
         }
 
+        public void RunAttack()
+        {
+            animator.SetTrigger("Attack");
+        }
+
         public void FinishAttack()
         {
-            player.StopAttack();
+            // player.EndAttack();
         }
     }
 }

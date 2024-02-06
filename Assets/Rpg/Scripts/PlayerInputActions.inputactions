@@ -15,21 +15,21 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Attack",
+                    "name": "MainAction",
                     "type": "Button",
                     "id": "e9fb6342-bad1-4f47-b88f-05dd565b2059",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Hold,Press(behavior=1)",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Shoot",
+                    "name": "SecondAction",
                     "type": "Button",
                     "id": "03357fe6-2dbb-4f81-a54e-8938e2ee9cc3",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Hold,Press(behavior=1)",
                     "initialStateCheck": false
                 },
                 {
@@ -105,7 +105,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Attack",
+                    "action": "MainAction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -116,7 +116,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Shoot",
+                    "action": "SecondAction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -37,7 +37,11 @@ namespace ProjectGo2D.Rpg
         // Update is called once per frame
         void Update()
         {
-            if (character.IsInvulnerable()) return;
+            if (character.IsInvulnerable())
+            {
+                ApplyImpact();
+                return;
+            }
             actionTimer += Time.deltaTime;
             if (actionTimer < actionInterval)
             {
@@ -66,28 +70,40 @@ namespace ProjectGo2D.Rpg
             {
                 animator.SetBool("Walking", true);
                 direction = movement;
-                bool moved = character.TryMove(boxCollider, direction, collisionDistance, collisionLayer);
-                if (!moved)
-                {
-                    moved = character.TryMove(boxCollider, new Vector2(direction.x, 0), collisionDistance, collisionLayer);
-                }
-                if (!moved)
-                {
-                    character.TryMove(boxCollider, new Vector2(0, direction.y), collisionDistance, collisionLayer);
-                }
-
-                if (direction.x < 0)
-                {
-                    transform.localScale = new Vector2(-1, 1);
-                }
-                else
-                {
-                    transform.localScale = new Vector2(1, 1);
-                }
+                ApplyMovement(direction);
             }
             else
             {
                 animator.SetBool("Walking", false);
+            }
+        }
+
+        private void ApplyImpact()
+        {
+            if (!character.HasReceivedImpact()) return;
+            var movement = character.GetReceivedImpact();
+            ApplyMovement(movement);
+        }
+
+        private void ApplyMovement(Vector2 movement)
+        {
+            bool moved = character.TryMove(boxCollider, movement, collisionDistance, collisionLayer);
+            if (!moved)
+            {
+                moved = character.TryMove(boxCollider, new Vector2(movement.x, 0), collisionDistance, collisionLayer);
+            }
+            if (!moved)
+            {
+                character.TryMove(boxCollider, new Vector2(0, movement.y), collisionDistance, collisionLayer);
+            }
+
+            if (movement.x < 0)
+            {
+                transform.localScale = new Vector2(-1, 1);
+            }
+            else
+            {
+                transform.localScale = new Vector2(1, 1);
             }
         }
 
@@ -123,7 +139,7 @@ namespace ProjectGo2D.Rpg
             return patrolPoints.ElementAt(targetPointIndex).position;
         }
 
-        private void HandleHealthChanged(float newHealth, float oldHealth)
+        private void HandleHealthChanged(float oldHealth, float newHealth)
         {
             if (newHealth == 0)
             {

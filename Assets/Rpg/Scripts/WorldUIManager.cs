@@ -15,11 +15,13 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private T prefab;
         private List<T> instances = new List<T>();
 
-        public void Prepare(Transform container)
+        public void Prepare(Transform container = null)
         {
             for (int i = 0; i < poolLimit; i++)
             {
-                var instance = GameObject.Instantiate(prefab, container.position, container.rotation, container);
+                var instance = container == null
+                    ? GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity)
+                    : GameObject.Instantiate(prefab, container.position, container.rotation, container);
                 instance.gameObject.SetActive(false);
                 instances.Add(instance);
             }

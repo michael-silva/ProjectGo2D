@@ -64,6 +64,7 @@ namespace ProjectGo2D.Rpg
         void GainXP(float value);
         bool ApplyDamage(CharacterBehaviour enemy, DamageType type);
         // bool TakeDamage(float enemy, DamageType type);
+        void ApplyImpact(Vector2 direction, float impact);
         void AddMoney(float value);
         bool TryAddToInventory(IInventoryItem item);
     }
@@ -74,6 +75,8 @@ namespace ProjectGo2D.Rpg
         public readonly UnityEvent<float, float> OnHealthChange = new UnityEvent<float, float>();
         public readonly UnityEvent<float, float> OnManaChange = new UnityEvent<float, float>();
         public readonly UnityEvent<float, float> OnMoneyChange = new UnityEvent<float, float>();
+
+        [SerializeField, ReadOnly] private Vector2 direction;
         [SerializeField] private float health;
         [SerializeField] private float mana;
         [SerializeField] private float money;
@@ -89,7 +92,7 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float speed;
         [SerializeField] private float magic;
         [SerializeField] private float shot;
-        [SerializeField] private float impact;
+        [SerializeField] private float resistance;
         [SerializeField] private float criticalChance;
         [SerializeField] private float invulnerableDuration;
         [SerializeField] private Inventory inventory;
@@ -135,15 +138,16 @@ namespace ProjectGo2D.Rpg
         public void HealHealth(float heal)
         {
             float newHealth = Mathf.Clamp(health + heal, 0, maxHealth);
-            OnHealthChange.Invoke(health, newHealth);
+            float oldHealth = health;
             health = newHealth;
+            OnHealthChange.Invoke(oldHealth, newHealth);
         }
 
-        private void ApplyImpact(Vector2 direction, float force)
+        public void ApplyImpact(Vector2 direction, float impact)
         {
-            bool received = Random.Range(0, 1) < force;
+            bool received = resistance < impact;
             if (!received) return;
-            receivedImpact = direction * force;
+            receivedImpact = direction * impact;
         }
 
         public bool IsDead()
@@ -157,12 +161,13 @@ namespace ProjectGo2D.Rpg
 
             float defend = Random.Range(0, defense);
             float realDamage = Mathf.Max(0, damage - defend);
+            float oldHealth = health;
             float newHealth = Mathf.Max(0, health - realDamage);
             if (newHealth == health) return false;
             var offset = new Vector3(0.1f, 0, 0);
             WorldUIManager.Instance.ShowHit(transform.position + offset, realDamage);
-            OnHealthChange.Invoke(newHealth, health);
             health = newHealth;
+            OnHealthChange.Invoke(oldHealth, newHealth);
             StartCoroutine(Invulnerability());
             return true;
         }
@@ -182,7 +187,17 @@ namespace ProjectGo2D.Rpg
             isInvulnerable = false;
         }
 
-        public bool ApplyDamage(CharacterBehaviour enemy, DamageType type)
+        public bool HasReceivedImpact()
+        {
+            return receivedImpact != Vector2.zero;
+        }
+
+        public Vector2 GetReceivedImpact()
+        {
+            return receivedImpact;
+        }
+
+        public float GetDamageForce(DamageType type)
         {
             float force = strength;
             switch (type)
@@ -194,6 +209,12 @@ namespace ProjectGo2D.Rpg
                     force = magic;
                     break;
             }
+            return force;
+        }
+
+        public bool ApplyDamage(CharacterBehaviour enemy, DamageType type)
+        {
+            float force = GetDamageForce(type);
             float damage = Random.Range(0, 1) < criticalChance ? force * 2 : force;
             if (enemy.TakeDamage(damage, type))
             {
@@ -202,10 +223,6 @@ namespace ProjectGo2D.Rpg
                     GainXP(enemy.GetXP());
                     return true;
                 }
-                // StartCoroutine(Invulnerability());
-                var dir = enemy.transform.position - transform.position;
-                dir.Normalize();
-                enemy.ApplyImpact(dir, impact);
                 return true;
             }
             return false;
@@ -271,6 +288,15 @@ namespace ProjectGo2D.Rpg
         {
             levelPoints--;
             return GetAvailablePoints();
+        }
+
+        public Vector2 GetDirection()
+        {
+            return direction;
+        }
+        public void SetDirection(Vector2 dir)
+        {
+            direction = dir;
         }
     }
 

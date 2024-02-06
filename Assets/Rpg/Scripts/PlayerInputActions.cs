@@ -39,21 +39,21 @@ namespace ProjectGo2D.Rpg
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""MainAction"",
                     ""type"": ""Button"",
                     ""id"": ""e9fb6342-bad1-4f47-b88f-05dd565b2059"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold,Press(behavior=1)"",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Shoot"",
+                    ""name"": ""SecondAction"",
                     ""type"": ""Button"",
                     ""id"": ""03357fe6-2dbb-4f81-a54e-8938e2ee9cc3"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold,Press(behavior=1)"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -129,7 +129,7 @@ namespace ProjectGo2D.Rpg
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Attack"",
+                    ""action"": ""MainAction"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -140,7 +140,7 @@ namespace ProjectGo2D.Rpg
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Shoot"",
+                    ""action"": ""SecondAction"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -174,8 +174,8 @@ namespace ProjectGo2D.Rpg
             // Player
             m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
             m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-            m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
-            m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
+            m_Player_MainAction = m_Player.FindAction("MainAction", throwIfNotFound: true);
+            m_Player_SecondAction = m_Player.FindAction("SecondAction", throwIfNotFound: true);
             m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
         }
 
@@ -239,16 +239,16 @@ namespace ProjectGo2D.Rpg
         private readonly InputActionMap m_Player;
         private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
         private readonly InputAction m_Player_Move;
-        private readonly InputAction m_Player_Attack;
-        private readonly InputAction m_Player_Shoot;
+        private readonly InputAction m_Player_MainAction;
+        private readonly InputAction m_Player_SecondAction;
         private readonly InputAction m_Player_Pause;
         public struct PlayerActions
         {
             private @PlayerInputActions m_Wrapper;
             public PlayerActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
             public InputAction @Move => m_Wrapper.m_Player_Move;
-            public InputAction @Attack => m_Wrapper.m_Player_Attack;
-            public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
+            public InputAction @MainAction => m_Wrapper.m_Player_MainAction;
+            public InputAction @SecondAction => m_Wrapper.m_Player_SecondAction;
             public InputAction @Pause => m_Wrapper.m_Player_Pause;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
@@ -262,12 +262,12 @@ namespace ProjectGo2D.Rpg
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
-                @Attack.started += instance.OnAttack;
-                @Attack.performed += instance.OnAttack;
-                @Attack.canceled += instance.OnAttack;
-                @Shoot.started += instance.OnShoot;
-                @Shoot.performed += instance.OnShoot;
-                @Shoot.canceled += instance.OnShoot;
+                @MainAction.started += instance.OnMainAction;
+                @MainAction.performed += instance.OnMainAction;
+                @MainAction.canceled += instance.OnMainAction;
+                @SecondAction.started += instance.OnSecondAction;
+                @SecondAction.performed += instance.OnSecondAction;
+                @SecondAction.canceled += instance.OnSecondAction;
                 @Pause.started += instance.OnPause;
                 @Pause.performed += instance.OnPause;
                 @Pause.canceled += instance.OnPause;
@@ -278,12 +278,12 @@ namespace ProjectGo2D.Rpg
                 @Move.started -= instance.OnMove;
                 @Move.performed -= instance.OnMove;
                 @Move.canceled -= instance.OnMove;
-                @Attack.started -= instance.OnAttack;
-                @Attack.performed -= instance.OnAttack;
-                @Attack.canceled -= instance.OnAttack;
-                @Shoot.started -= instance.OnShoot;
-                @Shoot.performed -= instance.OnShoot;
-                @Shoot.canceled -= instance.OnShoot;
+                @MainAction.started -= instance.OnMainAction;
+                @MainAction.performed -= instance.OnMainAction;
+                @MainAction.canceled -= instance.OnMainAction;
+                @SecondAction.started -= instance.OnSecondAction;
+                @SecondAction.performed -= instance.OnSecondAction;
+                @SecondAction.canceled -= instance.OnSecondAction;
                 @Pause.started -= instance.OnPause;
                 @Pause.performed -= instance.OnPause;
                 @Pause.canceled -= instance.OnPause;
@@ -307,8 +307,8 @@ namespace ProjectGo2D.Rpg
         public interface IPlayerActions
         {
             void OnMove(InputAction.CallbackContext context);
-            void OnAttack(InputAction.CallbackContext context);
-            void OnShoot(InputAction.CallbackContext context);
+            void OnMainAction(InputAction.CallbackContext context);
+            void OnSecondAction(InputAction.CallbackContext context);
             void OnPause(InputAction.CallbackContext context);
         }
     }
