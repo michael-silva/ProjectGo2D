@@ -46,7 +46,7 @@ namespace ProjectGo2D.Rpg
         void Update()
         {
             if (lockControls) return;
-            var inputVector = InputManager.Instance.GetMovementVector();
+            var inputVector = InputManager.Instance.GetPlayerMovementVector();
             ApplyMovement(inputVector);
             TestInteraction();
             TestCollectables();

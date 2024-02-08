@@ -50,6 +50,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52f1cdd0f82bacb459e08e9cb2b00246, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  image: {fileID: 1997828774, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
+  nameLabel: Ether
+  description: Fill 20 of mana
   id: 2
   value: 50
 --- !u!1 &2752882767612696262

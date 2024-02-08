@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ProjectGo2D.Shared;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,7 +8,7 @@ using UnityEngine.Events;
 namespace ProjectGo2D.Rpg
 {
     [System.Serializable]
-    public struct InventorySlot
+    public class InventorySlot
     {
         public IInventoryItem item;
         public int quantity;
@@ -23,8 +24,22 @@ namespace ProjectGo2D.Rpg
     public class Inventory
     {
         [SerializeField] private int maxSlots;
-        [SerializeField] private int rows;
         [SerializeField, ReadOnly] private List<InventorySlot> slots;
+
+        public List<InventorySlot> GetItems()
+        {
+            return slots;
+        }
+
+        public InventorySlot? GetItem(int index)
+        {
+            return HasElement(index) ? slots.ElementAt(index) : null;
+        }
+
+        public bool HasElement(int index)
+        {
+            return index >= 0 && index < slots.Count;
+        }
 
         public int IndexOf(IInventoryItem item)
         {
@@ -47,6 +62,19 @@ namespace ProjectGo2D.Rpg
                 return true;
             }
         }
+
+
+        public bool TryRemoveItem(int index)
+        {
+            if (!HasElement(index)) return false;
+            var slot = slots[index];
+            slot.quantity--;
+            if (slot.quantity == 0)
+            {
+                slots.RemoveAt(index);
+            }
+            return true;
+        }
     }
 
     public enum DamageType
@@ -67,6 +95,9 @@ namespace ProjectGo2D.Rpg
         void ApplyImpact(Vector2 direction, float impact);
         void AddMoney(float value);
         bool TryAddToInventory(IInventoryItem item);
+        bool TryRemoveFromInventory(int index);
+        List<InventorySlot> GetInventoryItems();
+        InventorySlot? GetInventoryItemAt(int index);
     }
 
     public abstract class CharacterBehaviour : MonoBehaviour, ICharacter
@@ -75,6 +106,8 @@ namespace ProjectGo2D.Rpg
         public readonly UnityEvent<float, float> OnHealthChange = new UnityEvent<float, float>();
         public readonly UnityEvent<float, float> OnManaChange = new UnityEvent<float, float>();
         public readonly UnityEvent<float, float> OnMoneyChange = new UnityEvent<float, float>();
+        public readonly UnityEvent OnInventoryChange = new UnityEvent();
+
 
         [SerializeField, ReadOnly] private Vector2 direction;
         [SerializeField] private float health;
@@ -274,9 +307,23 @@ namespace ProjectGo2D.Rpg
             }
         }
 
+        public List<InventorySlot> GetInventoryItems()
+        {
+            return inventory.GetItems();
+        }
+
+        public InventorySlot? GetInventoryItemAt(int index)
+        {
+            return inventory.GetItem(index);
+        }
+
         public bool TryAddToInventory(IInventoryItem item)
         {
             return inventory.TryAddItem(item);
+        }
+        public bool TryRemoveFromInventory(int index)
+        {
+            return inventory.TryRemoveItem(index);
         }
 
         public int GetAvailablePoints()

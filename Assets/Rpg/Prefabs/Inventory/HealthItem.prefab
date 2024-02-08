@@ -50,6 +50,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701447bad02d8f04c9d256639891f760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  image: {fileID: 934571490, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
+  nameLabel: Potion
+  description: Fill 100 of health
   id: 1
   value: 50
 --- !u!1 &8973848245848533264
