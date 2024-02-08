@@ -22,20 +22,17 @@ namespace ProjectGo2D.Rpg
         void Start()
         {
             ResetIndex();
-            InputManager.Instance.OnMoveUICalled.AddListener(MoveHandler);
-            InputManager.Instance.OnConfirmUICalled.AddListener(ConfirmHandler);
         }
 
         private void ConfirmHandler()
         {
-            if (!enabled) return;
             buttons[focusedIndex].Activate();
             OnActivate.Invoke(focusedIndex);
         }
 
         private void MoveHandler(Vector2 inputVector)
         {
-            if (!enabled || inputVector == Vector2.zero) return;
+            if (inputVector == Vector2.zero) return;
             if (inputVector.x > 0)
             {
                 MoveToColumn(currentCol + 1);
@@ -92,9 +89,7 @@ namespace ProjectGo2D.Rpg
         public void ResetIndex()
         {
             if (!ExistsButtonAt(defaultIndex)) return;
-            UpdateIndex(defaultIndex);
-            currentCol = 1 + defaultIndex % cols;
-            currentRow = 1 + Mathf.CeilToInt(defaultIndex / cols);
+            FocusInto(defaultIndex);
         }
 
         public List<UIButton> GetAllButtons()
@@ -105,6 +100,25 @@ namespace ProjectGo2D.Rpg
         public int GetFocusedIndex()
         {
             return focusedIndex;
+        }
+
+        public void FocusInto(int index)
+        {
+            UpdateIndex(index);
+            currentCol = 1 + index % cols;
+            currentRow = 1 + Mathf.CeilToInt(index / cols);
+        }
+
+        private void OnEnable()
+        {
+            InputManager.Instance.OnMoveUICalled.AddListener(MoveHandler);
+            InputManager.Instance.OnConfirmUICalled.AddListener(ConfirmHandler);
+        }
+
+        private void OnDisable()
+        {
+            InputManager.Instance.OnMoveUICalled.RemoveListener(MoveHandler);
+            InputManager.Instance.OnConfirmUICalled.RemoveListener(ConfirmHandler);
         }
 
     }

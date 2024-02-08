@@ -13,8 +13,9 @@ namespace ProjectGo2D.Rpg
     public abstract class CharacterSkill : MonoBehaviour
     {
         public readonly UnityEvent OnSkillFinished = new UnityEvent();
-        // [SerializeField] private float cooldown;
-        // [SerializeField] private float duration;
+        [SerializeField] private string skillName;
+        [SerializeField] private Sprite sprite;
+        [SerializeField] private string description;
         [SerializeField] private bool lockControls;
 
         // [SerializeField, ReadOnly] private float timer;
@@ -60,5 +61,18 @@ namespace ProjectGo2D.Rpg
         // {
         //     timer = 0;
         // }
+        public string GetName()
+        {
+            return skillName;
+        }
+        public string GetDescription()
+        {
+            return description;
+        }
+        public Sprite GetSprite()
+        {
+            return sprite;
+        }
+
     }
 }

@@ -12,7 +12,7 @@ namespace ProjectGo2D.Rpg
         public readonly UnityEvent OnActivate = new UnityEvent();
         public readonly UnityEvent OnFocus = new UnityEvent();
         public readonly UnityEvent OnBlur = new UnityEvent();
-        [SerializeField] private Animator animator;
+        [SerializeField] protected Animator animator;
         [SerializeField] private bool focused;
         [SerializeField] private Image image;
         [SerializeField] private TextMeshProUGUI label;
@@ -57,7 +57,7 @@ namespace ProjectGo2D.Rpg
             label.text = text;
         }
 
-        private void UpdateAnimation()
+        protected virtual void UpdateAnimation()
         {
             animator.SetBool("Focus", focused);
         }

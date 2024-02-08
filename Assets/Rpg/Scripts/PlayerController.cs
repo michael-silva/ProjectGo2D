@@ -16,9 +16,9 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private float collisionDownOffset;
         [SerializeField] private float collisionUpOffset;
         [SerializeField] private float collisionDistance;
-        [SerializeField] private CharacterSkill primarySkill;
-        [SerializeField] private CharacterSkill secondarySkill;
-        [SerializeField] private List<CharacterSkill> availableSecondarySkills;
+        [SerializeField] private CharacterSkill mainSkill;
+        [SerializeField] private CharacterSkill auxSkill;
+        [SerializeField] private List<CharacterSkill> availableSkills;
         [SerializeField] private LayerMask collisionLayer;
         [SerializeField] private LayerMask interactionLayer;
         [SerializeField] private LayerMask collectableLayer;
@@ -32,15 +32,15 @@ namespace ProjectGo2D.Rpg
         {
             character = GetComponent<CharacterBehaviour>();
             boxCollider = GetComponent<BoxCollider2D>();
-            primarySkill.OnSkillFinished.AddListener(() => SkillEnded(primarySkill));
-            secondarySkill.OnSkillFinished.AddListener(() => SkillEnded(secondarySkill));
+            mainSkill.OnSkillFinished.AddListener(() => SkillEnded(mainSkill));
+            auxSkill.OnSkillFinished.AddListener(() => SkillEnded(auxSkill));
             character.OnHealthChange.AddListener(HandleHealthChanged);
             InputManager.Instance.OnActionStarted.AddListener(MainActionStarted);
-            InputManager.Instance.OnActionCalled.AddListener(() => ExecuteSkill(primarySkill));
-            InputManager.Instance.OnActionReleased.AddListener(() => ReleaseSkill(primarySkill));
-            InputManager.Instance.OnSecondaryActionStarted.AddListener(() => PrepareSkill(secondarySkill));
-            InputManager.Instance.OnSecondaryActionCalled.AddListener(() => ExecuteSkill(secondarySkill));
-            InputManager.Instance.OnSecondaryActionReleased.AddListener(() => ReleaseSkill(secondarySkill));
+            InputManager.Instance.OnActionCalled.AddListener(() => ExecuteSkill(mainSkill));
+            InputManager.Instance.OnActionReleased.AddListener(() => ReleaseSkill(mainSkill));
+            InputManager.Instance.OnSecondaryActionStarted.AddListener(() => PrepareSkill(auxSkill));
+            InputManager.Instance.OnSecondaryActionCalled.AddListener(() => ExecuteSkill(auxSkill));
+            InputManager.Instance.OnSecondaryActionReleased.AddListener(() => ReleaseSkill(auxSkill));
         }
 
         void Update()
@@ -133,7 +133,7 @@ namespace ProjectGo2D.Rpg
         {
             if (Time.timeScale == 0) return;
             if (TryInteract()) return;
-            PrepareSkill(primarySkill);
+            PrepareSkill(mainSkill);
         }
 
         public void PrepareSkill(CharacterSkill skill)
@@ -182,6 +182,36 @@ namespace ProjectGo2D.Rpg
         public void UnlockControls()
         {
             lockControls = false;
+        }
+
+        public CharacterSkill GetMainSkill()
+        {
+            return mainSkill;
+        }
+        public CharacterSkill GetAuxiliarySkill()
+        {
+            return auxSkill;
+        }
+        public CharacterSkill GetAvailableSkillAt(int index)
+        {
+            return availableSkills[index];
+        }
+        public List<CharacterSkill> GetAvailableSkills()
+        {
+            return availableSkills;
+        }
+        public int GetAvailableSkillIndex(CharacterSkill skill)
+        {
+            return availableSkills.IndexOf(skill);
+        }
+
+        public void SetMainSkill(CharacterSkill skill)
+        {
+            mainSkill = skill;
+        }
+        public void SetAuxiliarySkill(CharacterSkill skill)
+        {
+            auxSkill = skill;
         }
     }
 }

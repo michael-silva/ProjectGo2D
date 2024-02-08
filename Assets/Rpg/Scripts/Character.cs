@@ -109,7 +109,7 @@ namespace ProjectGo2D.Rpg
         public readonly UnityEvent OnInventoryChange = new UnityEvent();
 
 
-        [SerializeField, ReadOnly] private Vector2 direction;
+        [SerializeField] private Vector2 direction;
         [SerializeField] private float health;
         [SerializeField] private float mana;
         [SerializeField] private float money;
@@ -344,6 +344,77 @@ namespace ProjectGo2D.Rpg
         public void SetDirection(Vector2 dir)
         {
             direction = dir;
+        }
+
+        public int GetLevel()
+        {
+            return level;
+        }
+        public float GetExperience()
+        {
+            return exp;
+        }
+        public float GetNextLevelExp()
+        {
+            return levelUpXp;
+        }
+
+        public float GetHealth()
+        {
+            return health;
+        }
+        public float GetMana()
+        {
+            return mana;
+        }
+        public float GetStrength()
+        {
+            return strength;
+        }
+        public float GetDefense()
+        {
+            return defense;
+        }
+        public float GetMagic()
+        {
+            return magic;
+        }
+        public float GetShot()
+        {
+            return shot;
+        }
+
+
+
+        public void IncreaseHealth()
+        {
+            health++;
+            levelPoints++;
+        }
+        public void IncreaseMana()
+        {
+            mana++;
+            levelPoints++;
+        }
+        public void IncreaseStrength()
+        {
+            strength++;
+            levelPoints++;
+        }
+        public void IncreaseDefense()
+        {
+            defense++;
+            levelPoints++;
+        }
+        public void IncreaseMagic()
+        {
+            magic++;
+            levelPoints++;
+        }
+        public void IncreaseShot()
+        {
+            shot++;
+            levelPoints++;
         }
     }
 

@@ -47,13 +47,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae952b6745101284d975b7636d710722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skillName: Sword Hit
+  sprite: {fileID: 21300000, guid: 722457268bcad2f4ebb4c3ee499643b3, type: 3}
+  description: Attack with a heavy sword
   lockControls: 1
+  cooldown: 0
+  duration: 0
   character: {fileID: 3626161104722946660}
   characterAnimator: {fileID: 3626161106478619664}
   swordHorizontalHitbox: {fileID: 513730531}
   swordVerticalHitbox: {fileID: 1035018136}
   swordHorizontalHitboxOffset: {x: 0, y: 0}
   swordVerticalHitboxOffset: {x: 0, y: 0}
+  isPrepared: 0
+  isRunning: 0
+  timer: 0
 --- !u!1 &181313302
 GameObject:
   m_ObjectHideFlags: 0
@@ -4937,7 +4945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19b5ed444c4c04f439618206dc8bd5eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitEffect: {fileID: 0}
+  hitEffect: {fileID: 181313305}
   hitTag: Enemy
   character: {fileID: 3626161104722946660}
   damageType: 0
@@ -5013,7 +5021,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19b5ed444c4c04f439618206dc8bd5eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitEffect: {fileID: 0}
+  hitEffect: {fileID: 181313305}
   hitTag: Enemy
   character: {fileID: 3626161104722946660}
   damageType: 0
@@ -5147,7 +5155,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8633252216465468139}
-  - component: {fileID: 3923087285384621617}
   - component: {fileID: 5204465552993681990}
   m_Layer: 0
   m_Name: FireShooter
@@ -5172,24 +5179,6 @@ Transform:
   m_Father: {fileID: 8757212582034319775}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3923087285384621617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2294996829784226805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1fc195b400201848a08f0a8007fdb15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lockControls: 0
-  offset: 0
-  character: {fileID: 3626161104722946660}
-  arrowsPool:
-    poolLimit: 100
-    prefab: {fileID: 5333152842386829711, guid: 1a8ff16e273d1a44cb0b2352a7bfac6b, type: 3}
 --- !u!114 &5204465552993681990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5202,17 +5191,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c6ef9859075b354c8aa82dfa42d00a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skillName: Firebal
+  sprite: {fileID: 21300000, guid: 0869b1e96aac6d34cb086976dc7af826, type: 3}
+  description: Shot fireballs or hold to shoot a large fire
   lockControls: 0
+  cooldown: 0.3
+  duration: 0
   offset: 0
-  chargeDelay: 0.5
+  chargeDelay: 1
   chargingEffect: {fileID: 8680188144443836672}
   character: {fileID: 3626161104722946660}
   fireballPool:
     poolLimit: 50
-    prefab: {fileID: 0}
+    prefab: {fileID: 7496392183325489332, guid: 95741c730c908ac4fa5843702e4c43e3, type: 3}
   superPool:
     poolLimit: 10
-    prefab: {fileID: 0}
+    prefab: {fileID: 5419786602663734945, guid: 6850d170bbfcec244beb17d93d28a0d6, type: 3}
+  isPrepared: 0
+  isRunning: 0
+  timer: 0
 --- !u!1 &3027601910820952526
 GameObject:
   m_ObjectHideFlags: 0
@@ -10105,9 +10102,14 @@ MonoBehaviour:
   collisionDownOffset: 0
   collisionUpOffset: 0
   collisionDistance: 0.1
-  primarySkill: {fileID: 82429344}
-  secondarySkill: {fileID: 3496015029938090312}
-  availableSecondarySkills: []
+  mainSkill: {fileID: 82429344}
+  auxSkill: {fileID: 3496015029938090312}
+  availableSkills:
+  - {fileID: 1500386973}
+  - {fileID: 3496015029938090312}
+  - {fileID: 2951652639746116534}
+  - {fileID: 82429344}
+  - {fileID: 5204465552993681990}
   collisionLayer:
     serializedVersion: 2
     m_Bits: 2112
@@ -10172,7 +10174,6 @@ MonoBehaviour:
   invulnerableDuration: 0.5
   inventory:
     maxSlots: 5
-    rows: 0
     slots: []
 --- !u!1 &3626161106008995171
 GameObject:
@@ -20148,12 +20149,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fc195b400201848a08f0a8007fdb15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skillName: Arrow Shooter
+  sprite: {fileID: 1737672109, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
+  description: 'Quickly shoot arrows '
   lockControls: 0
+  cooldown: 0.2
+  duration: 0
   offset: 0
   character: {fileID: 3626161104722946660}
   arrowsPool:
     poolLimit: 100
     prefab: {fileID: 5333152842386829711, guid: 1a8ff16e273d1a44cb0b2352a7bfac6b, type: 3}
+  isPrepared: 0
+  isRunning: 0
+  timer: 0
 --- !u!1 &6690109472971158895
 GameObject:
   m_ObjectHideFlags: 0
@@ -20199,10 +20208,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1acbb54f04557964495b52d1b6a0f2a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skillName: Barrier
+  sprite: {fileID: 21300000, guid: ca17161ee20736d4282c05c6c94bfd61, type: 3}
+  description: 'Hold the button to maintain the barrier and heart '
   lockControls: 0
-  sprite: {fileID: 0}
+  realBarrier: {fileID: 4575133796266476124}
   cooldown: 1
-  duration: 3
+  duration: 5
   isPrepared: 0
   isRunning: 0
   timer: 0
@@ -20251,6 +20263,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02825ea92747fbd479c264e8a34e63de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skillName: Heal
+  sprite: {fileID: 21300000, guid: 8356d3f35cde38e4ab09c51bffe1c56e, type: 3}
+  description: Heal 50 points of HP
   lockControls: 1
   cooldown: 1
   duration: 0.7

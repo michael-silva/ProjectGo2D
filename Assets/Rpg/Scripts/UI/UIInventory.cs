@@ -34,6 +34,7 @@ namespace ProjectGo2D.Rpg
         }
         private void HandleActionActivation(int index)
         {
+            if (!gameObject.activeSelf) return;
             if (index == confirmActionIndex)
             {
                 int inventoryIndex = inventoryButtons.GetFocusedIndex();
@@ -48,6 +49,7 @@ namespace ProjectGo2D.Rpg
 
         private void HandleInventoryActivation(int index)
         {
+            if (!gameObject.activeSelf) return;
             var slot = character.GetInventoryItemAt(index);
             if (slot == null) return;
             StartCoroutine(EnableActions());
