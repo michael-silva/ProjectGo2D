@@ -6,8 +6,26 @@ using UnityEngine;
 
 namespace ProjectGo2D.Rpg
 {
+
+    public static class SpriteUtils
+    {
+        public static IEnumerator BlinkSprite(SpriteRenderer spriteRenderer, float duration, int flashCount = 4)
+        {
+            var defaultColor = spriteRenderer.color;
+            float interval = duration / (flashCount * 2);
+            for (int i = 0; i < flashCount; i++)
+            {
+                spriteRenderer.color = Color.red;
+                yield return new WaitForSeconds(interval);
+                spriteRenderer.color = defaultColor;
+                yield return new WaitForSeconds(interval);
+            }
+        }
+    }
+
     public class SlimeAI : MonoBehaviour
     {
+        [SerializeField] private ObjectPool<ArrowBullet> bulletsPool;
         [SerializeField] private List<SpawnItem> items;
         [SerializeField] private Animator animator;
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -20,7 +38,6 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private BoxCollider2D attackHitbox;
         [SerializeField] private float collisionDistance;
         [SerializeField] private LayerMask collisionLayer;
-        [SerializeField, ReadOnly] private Vector2 direction;
         [SerializeField, ReadOnly] private int targetPointIndex;
         private BoxCollider2D boxCollider;
         private float actionTimer;
@@ -28,6 +45,7 @@ namespace ProjectGo2D.Rpg
         // Start is called before the first frame update
         void Start()
         {
+            if (bulletsPool != null) bulletsPool.Prepare();
             character = GetComponent<CharacterBehaviour>();
             boxCollider = GetComponent<BoxCollider2D>();
             targetPointIndex = 0;
@@ -57,6 +75,7 @@ namespace ProjectGo2D.Rpg
                 {
                     Attack();
                     actionTimer = 0;
+                    return;
                 }
                 else
                 {
@@ -64,18 +83,32 @@ namespace ProjectGo2D.Rpg
                     actionTimer = 0;
                 }
             }
+
             var inputVector = targetPoint - transform.position;
             var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
+            character.SetDirection(movement);
+            if (isFollowPlayer && bulletsPool != null && Random.Range(0f, 1f) < 0.4f)
+            {
+                Shoot();
+                actionTimer = 0;
+                return;
+            }
             if (movement != Vector2.zero)
             {
                 animator.SetBool("Walking", true);
-                direction = movement;
-                ApplyMovement(direction);
+                ApplyMovement(movement);
             }
             else
             {
                 animator.SetBool("Walking", false);
             }
+        }
+
+        private void Shoot()
+        {
+            var direction = character.GetDirection();
+            var arrow = bulletsPool.GetElement(transform.position);
+            arrow.Shoot(direction);
         }
 
         private void ApplyImpact()
@@ -151,23 +184,9 @@ namespace ProjectGo2D.Rpg
             else if (newHealth < oldHealth)
             {
                 animator.SetBool("Walking", false);
-                StartCoroutine(BlinkSprite());
+                StartCoroutine(SpriteUtils.BlinkSprite(spriteRenderer, character.GetInvulnerableDuration()));
             }
         }
-
-        private IEnumerator BlinkSprite()
-        {
-            float flashNumbers = 4;
-            float interval = character.GetInvulnerableDuration() / (flashNumbers * 2);
-            for (int i = 0; i < flashNumbers; i++)
-            {
-                spriteRenderer.color = Color.red;
-                yield return new WaitForSeconds(interval);
-                spriteRenderer.color = Color.white;
-                yield return new WaitForSeconds(interval);
-            }
-        }
-
         private Transform SeePlayerInRange()
         {
             var hit = Physics2D.CircleCast(transform.position, viewDistance, Vector2.zero, 0, playerLayer);

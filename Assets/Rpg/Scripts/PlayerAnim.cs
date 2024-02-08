@@ -46,12 +46,13 @@ namespace ProjectGo2D.Rpg
 
         private IEnumerator BlinkSprite()
         {
+            var defaultColor = spriteRenderer.color;
             float interval = character.GetInvulnerableDuration() / (flashNumbers * 2);
             for (int i = 0; i < flashNumbers; i++)
             {
                 spriteRenderer.color = Color.red;
                 yield return new WaitForSeconds(interval);
-                spriteRenderer.color = Color.white;
+                spriteRenderer.color = defaultColor;
                 yield return new WaitForSeconds(interval);
             }
         }

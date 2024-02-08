@@ -2,15 +2,10 @@
 
 ## Platformer
 
-Ready to Level design and build
+- Ready to Level design and build
 
 ## RPG
 
-- Inventory UI
-- XP and Level points distribution UI
-- Weapon and spells equip UI
-
-- Variation of enemies
 - Ready to Level design and build
 
 ## General
