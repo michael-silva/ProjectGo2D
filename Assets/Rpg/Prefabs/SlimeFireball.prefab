@@ -4905,7 +4905,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 3522819589641050159}
   speed: 1.5
-  distance: 5
+  distance: 2
   direction: {x: 0, y: 0}
 --- !u!1 &7279418610065451212
 GameObject:

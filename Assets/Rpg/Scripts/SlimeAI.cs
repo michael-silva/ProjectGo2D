@@ -55,6 +55,7 @@ namespace ProjectGo2D.Rpg
         // Update is called once per frame
         void Update()
         {
+            if (GameManager.Instance.IsPaused()) return;
             if (character.IsInvulnerable())
             {
                 ApplyImpact();
@@ -87,9 +88,9 @@ namespace ProjectGo2D.Rpg
             var inputVector = targetPoint - transform.position;
             var movement = new Vector2(inputVector.normalized.x, inputVector.normalized.y);
             character.SetDirection(movement);
-            if (isFollowPlayer && bulletsPool != null && Random.Range(0f, 1f) < 0.4f)
+            if (isFollowPlayer && bulletsPool.IsReady())
             {
-                Shoot();
+                if (Random.Range(0f, 1f) < 0.2f) Shoot();
                 actionTimer = 0;
                 return;
             }

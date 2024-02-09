@@ -9,6 +9,7 @@ namespace ProjectGo2D.Rpg
     {
         public static GameManager Instance { get; private set; }
         [SerializeField, ReadOnly] private bool isPaused;
+        [SerializeField, ReadOnly] private bool isVisibleMenu;
 
         void Awake()
         {
@@ -34,19 +35,40 @@ namespace ProjectGo2D.Rpg
 
         }
 
+        private bool CanTogglePauseMenu()
+        {
+            return !isPaused || isVisibleMenu;
+        }
+
         private void TogglePauseGame()
         {
-            isPaused = !isPaused;
-            if (isPaused)
+            if (!CanTogglePauseMenu()) return;
+            isVisibleMenu = !isVisibleMenu;
+            if (isVisibleMenu)
             {
+                PauseGame();
                 InputManager.Instance.EnableUIInputMode();
                 UIManager.Instance.ShowInventory();
             }
             else
             {
+                ResumeGame();
                 InputManager.Instance.EnablePlayerInputMode();
                 UIManager.Instance.HideInventory();
             }
+        }
+
+        public void PauseGame()
+        {
+            isPaused = true;
+        }
+        public void ResumeGame()
+        {
+            isPaused = false;
+        }
+        public bool IsPaused()
+        {
+            return isPaused;
         }
     }
 }

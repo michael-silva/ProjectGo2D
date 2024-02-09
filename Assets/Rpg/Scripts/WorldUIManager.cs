@@ -14,9 +14,11 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private int poolLimit;
         [SerializeField] private T prefab;
         private List<T> instances = new List<T>();
+        private bool isReady;
 
         public void Prepare(Transform container = null)
         {
+            if (poolLimit <= 0 || prefab == null) return;
             for (int i = 0; i < poolLimit; i++)
             {
                 var instance = container == null
@@ -25,6 +27,7 @@ namespace ProjectGo2D.Rpg
                 instance.gameObject.SetActive(false);
                 instances.Add(instance);
             }
+            isReady = true;
         }
 
         public void Release(T element)
@@ -32,8 +35,9 @@ namespace ProjectGo2D.Rpg
             element.gameObject.SetActive(false);
         }
 
-        public T GetElement(Vector2 position)
+        public T? GetElement(Vector2 position)
         {
+            if (!IsReady()) return null;
             for (int i = 0; i < poolLimit; i++)
             {
                 if (instances[i].gameObject.activeSelf) continue;
@@ -44,6 +48,47 @@ namespace ProjectGo2D.Rpg
             Debug.LogError("Pool is out of elements");
             return null;
         }
+
+        public bool IsReady()
+        {
+            return isReady;
+        }
+    }
+
+    public class UIDialog
+    {
+        private bool isSpeakFinished = false;
+        private int current = 0;
+        private List<string> speaks;
+
+        public UIDialog(List<string> speaks)
+        {
+            this.speaks = speaks;
+        }
+
+
+        internal string GetCurrentSpeak()
+        {
+            return speaks[current];
+        }
+
+        internal void SpeakFinished()
+        {
+            isSpeakFinished = true;
+        }
+
+        internal bool IsSpeakFinished()
+        {
+            return isSpeakFinished;
+        }
+
+        internal bool TryGoToNextSpeak()
+        {
+            if (current == speaks.Count - 1) return false;
+            current++;
+            isSpeakFinished = false;
+            return true;
+        }
     }
 
     public class WorldUIManager : MonoBehaviour
@@ -53,9 +98,11 @@ namespace ProjectGo2D.Rpg
         [SerializeField] private Transform interactionBalloon;
         [SerializeField] private ObjectPool<HitLabel> hitsPool;
         [SerializeField] private float dialogWordInterval;
-        [SerializeField] private Transform dialog;
+        [SerializeField] private Transform dialogTransform;
         [SerializeField] private Transform dialogNextIndicator;
         [SerializeField] private TextMeshProUGUI dialogText;
+        private Coroutine dialogCoroutine;
+        private UIDialog dialog;
 
         void Awake()
         {
@@ -107,15 +154,18 @@ namespace ProjectGo2D.Rpg
 
         public void ShowDialog(Vector2 position, List<string> speaks)
         {
-            Time.timeScale = 0;
-            dialog.position = position;
-            dialog.gameObject.SetActive(true);
-            StartCoroutine(DisplayText(speaks));
+            if (dialogTransform.gameObject.activeSelf) return;
+            GameManager.Instance.PauseGame();
+            dialogTransform.position = position;
+            dialogTransform.gameObject.SetActive(true);
+            dialog = new UIDialog(speaks);
+            dialogCoroutine = StartCoroutine(DisplayText());
+            InputManager.Instance.OnActionReleased.AddListener(ActionTextDialog);
         }
 
-        public IEnumerator DisplayText(List<string> speaks, int index = 0)
+        public IEnumerator DisplayText()
         {
-            string speak = speaks[index];
+            string speak = dialog.GetCurrentSpeak();
             dialogText.text = "";
             dialogNextIndicator.gameObject.SetActive(false);
             for (int i = 0; i < speak.Length; i++)
@@ -123,24 +173,32 @@ namespace ProjectGo2D.Rpg
                 dialogText.text += speak[i];
                 yield return new WaitForSecondsRealtime(dialogWordInterval);
             }
+            dialog.SpeakFinished();
+            dialogNextIndicator.gameObject.SetActive(true);
+        }
 
-            if (index + 1 == speaks.Count)
+        private void ActionTextDialog()
+        {
+            if (dialog.IsSpeakFinished())
             {
-                Time.timeScale = 1;
-                dialog.gameObject.SetActive(false);
+                if (dialog.TryGoToNextSpeak())
+                {
+                    dialogCoroutine = StartCoroutine(DisplayText());
+                }
+                else
+                {
+                    GameManager.Instance.ResumeGame();
+                    dialogTransform.gameObject.SetActive(false);
+                    InputManager.Instance.OnActionReleased.RemoveListener(ActionTextDialog);
+                }
             }
             else
             {
-                DisplayNextText(speaks, index + 1);
+                StopCoroutine(dialogCoroutine);
+                dialogText.text = dialog.GetCurrentSpeak();
+                dialog.SpeakFinished();
+                dialogNextIndicator.gameObject.SetActive(true);
             }
-        }
-
-        public void DisplayNextText(List<string> speaks, int index)
-        {
-            dialogNextIndicator.gameObject.SetActive(true);
-            UnityAction runNextText = () => StartCoroutine(DisplayText(speaks, index));
-            UnityAction removeListener = () => InputManager.Instance.OnActionCalled.RemoveListener(runNextText);
-            InputManager.Instance.OnActionCalled.AddListener(runNextText);
         }
     }
 }

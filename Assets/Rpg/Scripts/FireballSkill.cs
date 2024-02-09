@@ -67,6 +67,7 @@ namespace ProjectGo2D.Rpg
             isPrepared = false;
             isRunning = false;
             chargingEffect.Stop();
+            chargingEffect.Clear();
         }
 
         protected bool HasFinished()

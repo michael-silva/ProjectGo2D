@@ -78,8 +78,8 @@ GameObject:
   - component: {fileID: 5711437617030286091}
   - component: {fileID: 5711437617030286088}
   - component: {fileID: 5711437617030286089}
-  - component: {fileID: 5711437617030286090}
   - component: {fileID: 5711437617030286095}
+  - component: {fileID: 832441054789585790}
   m_Layer: 0
   m_Name: SlimeController
   m_TagString: Enemy
@@ -152,41 +152,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5711437617030286090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5711437617030286084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27a1a48d3263ead4d82972a0760551cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  direction: {x: 0, y: 0}
-  health: 100
-  mana: 0
-  money: 0
-  exp: 15
-  levelUpXp: 0
-  levelUpIncreaseRate: 0
-  level: 0
-  levelPoints: 0
-  maxHealth: 100
-  maxMana: 0
-  strength: 2
-  defense: 0
-  speed: 0.4
-  magic: 0
-  shot: 0
-  resistance: 0
-  criticalChance: 0
-  invulnerableDuration: 0.5
-  inventory:
-    maxSlots: 0
-    rows: 0
-    slots: []
 --- !u!114 &5711437617030286095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,6 +164,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2497b1c99ea3baa49b8a81ebe356a1bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bulletsPool:
+    poolLimit: 0
+    prefab: {fileID: 0}
   items:
   - collectable: {fileID: 719654265340795888, guid: b2be496052385654686d6241255653e6, type: 3}
     chance: 0.2
@@ -224,14 +192,51 @@ MonoBehaviour:
   - {fileID: 5711437618457279493}
   - {fileID: 5711437617264394306}
   - {fileID: 5711437618001684885}
-  character: {fileID: 5711437617030286090}
+  character: {fileID: 0}
   attackHitbox: {fileID: 5711437617127787617}
   collisionDistance: 0.05
   collisionLayer:
     serializedVersion: 2
     m_Bits: 2048
-  direction: {x: 0, y: 0}
   targetPointIndex: 0
+--- !u!114 &832441054789585790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5711437617030286084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ece03b72d7032dc4a871ea4cec9396bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  direction: {x: 0, y: 0}
+  health: 100
+  mana: 0
+  money: 0
+  exp: 15
+  levelUpXp: 0
+  levelUpIncreaseRate: 0
+  level: 0
+  levelPoints: 0
+  maxHealth: 100
+  maxMana: 0
+  strength: 0
+  defense: 0
+  speed: 0.4
+  magic: 0
+  shot: 0
+  resistance: 0
+  criticalChance: 0
+  invulnerableDuration: 0.5
+  inventory:
+    maxSlots: 0
+    slots: []
+  collisionLayer:
+    serializedVersion: 2
+    m_Bits: 2112
+  collisionDistance: 0.05
 --- !u!1 &5711437617127787619
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,7 +284,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitEffect: {fileID: 5711437618633036887}
   hitTag: Player
-  character: {fileID: 5711437617030286090}
+  character: {fileID: 832441054789585790}
   damageType: 0
   impact: 0.1
 --- !u!61 &5711437617127787617
@@ -381,6 +386,7 @@ GameObject:
   - component: {fileID: 5711437618270864898}
   - component: {fileID: 5711437618270864896}
   - component: {fileID: 5711437618270864897}
+  - component: {fileID: 7025482061065547956}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -476,6 +482,36 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7025482061065547956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5711437618270864899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShadowGroup: 0
+  m_ComponentVersion: 1
+  m_HasRenderer: 1
+  m_UseRendererSilhouette: 1
+  m_CastsShadows: 1
+  m_SelfShadows: 0
+  m_ApplyToSortingLayers: 000000003525a3314beb7d6e6915092a2d2c6fbc411daeaf391a96a0
+  m_ShapePath:
+  - {x: -0.053878784, y: -0.06365316, z: 0}
+  - {x: -0.06644583, y: -0.031297296, z: 0}
+  - {x: 0.07203114, y: -0.029900998, z: 0}
+  - {x: 0.05667144, y: -0.06365318, z: 0}
+  m_ShapePathHash: 2032255269
+  m_Mesh: {fileID: 0}
+  m_InstanceId: 92966
+  m_LocalBounds:
+    m_Center: {x: 0.0027926564, y: -0.04677709, z: 0}
+    m_Extent: {x: 0.069238484, y: 0.01687609, z: 0}
 --- !u!1 &5711437618457279494
 GameObject:
   m_ObjectHideFlags: 0

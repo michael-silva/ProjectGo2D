@@ -27,9 +27,9 @@ namespace ProjectGo2D.Rpg
 
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        private void OnTriggerStay2D(Collider2D other)
         {
-            if (!other.CompareTag(hitTag)) return;
+            if (!enabled && !other.CompareTag(hitTag)) return;
             var enemy = other.GetComponent<ICharacter>();
             if (enemy == null) return;
             if (character.ApplyDamage(enemy as CharacterBehaviour, damageType))

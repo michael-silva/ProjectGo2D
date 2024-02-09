@@ -5,13 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Platformer/Scenes/Level1.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 1
+  - enabled: 0
     path: Assets/Platformer/Scenes/Level2.unity
     guid: f12c427bce5a94e4a849b6b4cc30a875
-  - enabled: 1
+  - enabled: 0
     path: Assets/Platformer/Scenes/Level3.unity
     guid: 883acfe6fc30c45409e2754dd948deba
+  - enabled: 1
+    path: Assets/Rpg/Scenes/Main.unity
+    guid: a9ceaaae8fa8ec548a5f0ddc9f551c74
   m_configObjects: {}

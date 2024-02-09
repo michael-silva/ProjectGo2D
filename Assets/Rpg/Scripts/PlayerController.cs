@@ -45,6 +45,7 @@ namespace ProjectGo2D.Rpg
 
         void Update()
         {
+            if (GameManager.Instance.IsPaused()) return;
             if (lockControls) return;
             var inputVector = InputManager.Instance.GetPlayerMovementVector();
             ApplyMovement(inputVector);
@@ -73,7 +74,6 @@ namespace ProjectGo2D.Rpg
             if (!IsMoving()) return;
             var hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, character.GetDirection(), collisionDistance, interactionLayer);
             var interactive = hit.collider?.GetComponent<IInteractive>();
-            if (interactive == interactiveFocus) return;
             if (interactiveFocus != null) interactiveFocus.Disable();
             if (interactive != null) interactive.Enable();
             interactiveFocus = interactive;
@@ -131,20 +131,21 @@ namespace ProjectGo2D.Rpg
 
         private void MainActionStarted()
         {
-            if (Time.timeScale == 0) return;
+            if (GameManager.Instance.IsPaused()) return;
             if (TryInteract()) return;
             PrepareSkill(mainSkill);
         }
 
         public void PrepareSkill(CharacterSkill skill)
         {
+            if (GameManager.Instance.IsPaused()) return;
             if (lockControls) return;
             skill.Prepare();
         }
 
         public void ExecuteSkill(CharacterSkill skill)
         {
-            if (Time.timeScale == 0) return;
+            if (GameManager.Instance.IsPaused()) return;
             if (!skill.TryExecute()) return;
             if (!skill.NeedToLockControls()) return;
             LockControls();
@@ -152,7 +153,7 @@ namespace ProjectGo2D.Rpg
 
         public void ReleaseSkill(CharacterSkill skill)
         {
-            if (Time.timeScale == 0) return;
+            if (GameManager.Instance.IsPaused()) return;
             if (lockControls) return;
             skill.Release();
         }

@@ -22,7 +22,6 @@ namespace ProjectGo2D.Rpg
 
         public override void Interact()
         {
-            if (!active || !enabled) return;
             WorldUIManager.Instance.ShowDialog(transform.position, speaks);
         }
     }

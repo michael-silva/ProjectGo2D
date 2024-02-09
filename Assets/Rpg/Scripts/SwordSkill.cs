@@ -70,7 +70,7 @@ namespace ProjectGo2D.Rpg
             }
             else
             {
-                float y = direction.y >= 0 ? -swordVerticalHitboxOffset.y : swordVerticalHitboxOffset.y;
+                float y = direction.y < 0 ? -swordVerticalHitboxOffset.y : swordVerticalHitboxOffset.y;
                 swordVerticalHitbox.transform.localPosition = new Vector2(swordVerticalHitboxOffset.x, y);
                 swordVerticalHitbox.enabled = true;
 

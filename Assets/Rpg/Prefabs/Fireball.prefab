@@ -4888,7 +4888,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitEffect: {fileID: 7095402048087977716}
   hitTag: Enemy
-  character: {fileID: 3626161104722946660, guid: 643db54db57324944b6a1a2650f009a4, type: 3}
+  character: {fileID: 2003217541069300843, guid: 643db54db57324944b6a1a2650f009a4, type: 3}
   damageType: 1
   impact: 0
 --- !u!114 &7496392183325489332
